@@ -448,10 +448,11 @@ def main():
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
 
-    ROOT = "H:\MATLAB\TDTbin2mat\Photometry\RRD364\RRD364-230718-120541"
+    ROOT = r"I:\MATLAB\Sean CNMFe\RG-Insc-1\2022-03-12_RDT_D1"
 
     for root, dirs, files in os.walk(ROOT):
         slp_files = [f for f in files if f.endswith('.slp')]
+        print(slp_files)
         h5_files = [a for a in files if a.endswith('.h5')]
         for count, slp_file in enumerate(slp_files):
             if any(slp_file[:-4] in h5_file for h5_file in h5_files):

@@ -33,7 +33,7 @@ def main():
 
 def new_main():
 
-    directory_path = "H:\MATLAB\TDTbin2mat\Photometry\RRD364\RRD364-230718-120541"
+    directory_path = r"I:\MATLAB\Sean CNMFe\RG-Insc-1\2022-03-12_RDT_D1"
     model_path_1 = "D:/SLEAP/Photometry_and_Inscopix_Model/220201_133640.centroid.n=2688"
     model_path_2 = "D:/SLEAP/Photometry_and_Inscopix_Model/220201_141815.centered_instance.n=2688"
 

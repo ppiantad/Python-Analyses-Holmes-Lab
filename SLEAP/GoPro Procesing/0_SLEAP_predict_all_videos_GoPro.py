@@ -32,7 +32,7 @@ def main():
 
 def new_main():
 
-    directory_path = r"F:\BA-NAc CRISPR CNR1\BA-NA-Con-1"
+    directory_path = r"I:\MATLAB\Sean CNMFe\RG-Insc-1\2022-03-12_RDT_D1"
     model_path_1 = r"D:\SLEAP\Opto_Model\220708_114639.centroid.n=204"
     model_path_2 = r"D:\SLEAP\Opto_Model\220708_120742.centered_instance.n=204"
 
@@ -58,7 +58,7 @@ def one_vid():
     print(cmd)
     os.system(cmd)
 
-if __name__ == "__main__":
+if __name__ == "__new_main__":
     #main()
     new_main()
     #one_vid()
