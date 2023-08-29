@@ -6,7 +6,7 @@ import re
 import subprocess
 from pathlib import Path
 
-meta_folder_path = Path(r"F:\RDT FEMALES")
+meta_folder_path = Path(r"D:\Behavior Videos\BLA-NAcShell ArchT vs eYFP")
 
 
 
@@ -33,7 +33,11 @@ def grayscale_video(video_path, out_path):
 
 
 for root, dirs, files in os.walk(meta_folder_path):
+        # Exclude subfolders containing the exclusion string
+        dirs[:] = [d for d in dirs if "not in final dataset" not in d]        
+        
         # look for .MP4 files in each subfolder
+
         mp4_files = [f for f in files if f.endswith('.MP4')]
 
         filtered_vids = []
