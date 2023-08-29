@@ -37,6 +37,8 @@ def new_main():
     model_path_2 = r"D:\SLEAP\Opto_Model\220708_120742.centered_instance.n=204"
 
     for root, dirs, files in os.walk(directory_path):
+        # Exclude subfolders containing the exclusion string
+        dirs[:] = [d for d in dirs if "not in final dataset" not in d]      
         mp4_files = [f for f in files if f.endswith('merged_resized_grayscaled.MP4')]
         # Check if any .slp file exists in the directory
         slp_files = glob.glob(os.path.join(root, '*.slp'))

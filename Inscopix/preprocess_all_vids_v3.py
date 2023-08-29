@@ -38,7 +38,7 @@ def get_videos(root_path, endswith)-> list:
 
 
 def main() -> None:
-    root_path = Path(r"G:\Inscopix to analyze")
+    root_path = Path(r"D:\Inscopix to analyze")
     # ^Change this path to where your videos are stored
 
     print(root_path)
