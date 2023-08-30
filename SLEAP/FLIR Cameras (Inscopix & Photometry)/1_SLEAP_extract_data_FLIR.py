@@ -272,7 +272,7 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
         # works - adjusted x_axis_time so it starts at step, not at 0. also adjusted frames because the range starts at 1, so it needs to go to the length
         # of vel_mouse + 1
         step = float(1/fps)
-        x_axis_time = np.arange(step, range_max+step, step).tolist()
+        x_axis_time = np.arange(step, range_max, step).tolist()
         print(len(x_axis_time))
         frames = [i for i in range(1, len(vel_mouse)+1)]
         print("Frames: ", max(frames))
@@ -448,9 +448,10 @@ def main():
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
 
-    ROOT = r"I:\MATLAB\Sean CNMFe\RG-Insc-1\2022-03-12_RDT_D1"
+    ROOT = r"H:\MATLAB\TDTbin2mat\Photometry\RRD366"
 
     for root, dirs, files in os.walk(ROOT):
+        dirs[:] = [d for d in dirs if "not in final dataset" not in d]  
         slp_files = [f for f in files if f.endswith('.slp')]
         print(slp_files)
         h5_files = [a for a in files if a.endswith('.h5')]

@@ -1,0 +1,556 @@
+{
+    "data": {
+        "labels": {
+            "training_labels": "/media/rory/Padlock_DT/Opto_Analysis/neew_fov_model.slp",
+            "validation_labels": null,
+            "validation_fraction": 0.1,
+            "test_labels": null,
+            "split_by_inds": false,
+            "training_inds": [
+                111,
+                163,
+                53,
+                180,
+                4,
+                104,
+                187,
+                39,
+                118,
+                19,
+                51,
+                56,
+                164,
+                167,
+                89,
+                90,
+                38,
+                91,
+                178,
+                137,
+                16,
+                126,
+                20,
+                2,
+                181,
+                194,
+                96,
+                121,
+                13,
+                27,
+                103,
+                75,
+                150,
+                158,
+                151,
+                186,
+                61,
+                198,
+                136,
+                182,
+                35,
+                9,
+                120,
+                67,
+                3,
+                81,
+                179,
+                10,
+                36,
+                193,
+                175,
+                52,
+                130,
+                78,
+                50,
+                157,
+                185,
+                106,
+                171,
+                0,
+                202,
+                34,
+                114,
+                24,
+                23,
+                169,
+                48,
+                144,
+                43,
+                105,
+                183,
+                59,
+                176,
+                127,
+                17,
+                60,
+                200,
+                107,
+                55,
+                77,
+                92,
+                7,
+                46,
+                68,
+                42,
+                142,
+                18,
+                71,
+                140,
+                37,
+                146,
+                88,
+                152,
+                57,
+                173,
+                196,
+                192,
+                62,
+                21,
+                162,
+                132,
+                195,
+                174,
+                155,
+                80,
+                11,
+                119,
+                63,
+                138,
+                190,
+                82,
+                172,
+                99,
+                25,
+                139,
+                133,
+                6,
+                166,
+                123,
+                129,
+                15,
+                44,
+                87,
+                1,
+                72,
+                97,
+                94,
+                168,
+                30,
+                101,
+                40,
+                100,
+                109,
+                5,
+                201,
+                203,
+                177,
+                41,
+                66,
+                115,
+                165,
+                76,
+                124,
+                113,
+                70,
+                64,
+                95,
+                45,
+                145,
+                31,
+                143,
+                128,
+                108,
+                86,
+                189,
+                33,
+                22,
+                125,
+                102,
+                149,
+                79,
+                110,
+                58,
+                148,
+                83,
+                122,
+                154,
+                47,
+                12,
+                159,
+                147,
+                135,
+                134,
+                29,
+                161,
+                54,
+                26,
+                156,
+                153,
+                85,
+                184,
+                73,
+                32,
+                98
+            ],
+            "validation_inds": [
+                131,
+                49,
+                160,
+                191,
+                197,
+                84,
+                141,
+                170,
+                28,
+                14,
+                69,
+                112,
+                117,
+                116,
+                93,
+                65,
+                199,
+                188,
+                8,
+                74
+            ],
+            "test_inds": null,
+            "search_path_hints": [
+                "/media/rory/RDT VIDS/BORIS/RRD150_RDT_OPTO_CHOICE_2MW_11242020_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD36_Risk_D2_0.1_mA_OPTO_ALL_FREE_OUTCOMES_04022019_2_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD41_Risk_D2_0.1_mA_ALL_FREE_OUTCOMES_04032019_2_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD16_RewMag_ALL_FREE_OUTCOMES_01022019_4_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD156_RDT_OPTO_CHOICE_2mW_0.1_mA_11182020__4__merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD40_Risk_D2_0.1_mA_OPTO_ALL_FREE_OUTCOMES_04022019_3_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD35_Risk_D2_0.1_mA_ALL_FREE_OUTCOMES_04042019_3_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD168_RDT_OPTO_OUTCOME_01202021_6_merged_resized_grayscaled.mp4",
+                "/media/rory/RDT VIDS/BORIS/RRD37_Risk_D2_0.1_mA_ALL_FREE_OUTCOMES_04042019_3_merged_resized_grayscaled.mp4"
+            ],
+            "skeletons": [
+                {
+                    "directed": true,
+                    "graph": {
+                        "name": "Skeleton-0",
+                        "num_edges_inserted": 7
+                    },
+                    "links": [
+                        {
+                            "edge_insert_idx": 6,
+                            "key": 0,
+                            "source": {
+                                "py/object": "sleap.skeleton.Node",
+                                "py/state": {
+                                    "py/tuple": [
+                                        "body",
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "target": {
+                                "py/object": "sleap.skeleton.Node",
+                                "py/state": {
+                                    "py/tuple": [
+                                        "tail",
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "type": {
+                                "py/reduce": [
+                                    {
+                                        "py/type": "sleap.skeleton.EdgeType"
+                                    },
+                                    {
+                                        "py/tuple": [
+                                            1
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "edge_insert_idx": 3,
+                            "key": 0,
+                            "source": {
+                                "py/object": "sleap.skeleton.Node",
+                                "py/state": {
+                                    "py/tuple": [
+                                        "left_ear",
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "target": {
+                                "py/object": "sleap.skeleton.Node",
+                                "py/state": {
+                                    "py/tuple": [
+                                        "neck",
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "type": {
+                                "py/id": 3
+                            }
+                        },
+                        {
+                            "edge_insert_idx": 5,
+                            "key": 0,
+                            "source": {
+                                "py/id": 5
+                            },
+                            "target": {
+                                "py/id": 1
+                            },
+                            "type": {
+                                "py/id": 3
+                            }
+                        },
+                        {
+                            "edge_insert_idx": 4,
+                            "key": 0,
+                            "source": {
+                                "py/object": "sleap.skeleton.Node",
+                                "py/state": {
+                                    "py/tuple": [
+                                        "right_ear",
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "target": {
+                                "py/id": 5
+                            },
+                            "type": {
+                                "py/id": 3
+                            }
+                        },
+                        {
+                            "edge_insert_idx": 0,
+                            "key": 0,
+                            "source": {
+                                "py/object": "sleap.skeleton.Node",
+                                "py/state": {
+                                    "py/tuple": [
+                                        "snout",
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "target": {
+                                "py/id": 5
+                            },
+                            "type": {
+                                "py/id": 3
+                            }
+                        },
+                        {
+                            "edge_insert_idx": 1,
+                            "key": 0,
+                            "source": {
+                                "py/id": 7
+                            },
+                            "target": {
+                                "py/id": 4
+                            },
+                            "type": {
+                                "py/id": 3
+                            }
+                        },
+                        {
+                            "edge_insert_idx": 2,
+                            "key": 0,
+                            "source": {
+                                "py/id": 7
+                            },
+                            "target": {
+                                "py/id": 6
+                            },
+                            "type": {
+                                "py/id": 3
+                            }
+                        }
+                    ],
+                    "multigraph": true,
+                    "nodes": [
+                        {
+                            "id": {
+                                "py/id": 1
+                            }
+                        },
+                        {
+                            "id": {
+                                "py/id": 4
+                            }
+                        },
+                        {
+                            "id": {
+                                "py/id": 5
+                            }
+                        },
+                        {
+                            "id": {
+                                "py/id": 6
+                            }
+                        },
+                        {
+                            "id": {
+                                "py/id": 7
+                            }
+                        },
+                        {
+                            "id": {
+                                "py/id": 2
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "preprocessing": {
+            "ensure_rgb": false,
+            "ensure_grayscale": false,
+            "imagenet_mode": null,
+            "input_scaling": 0.5,
+            "pad_to_stride": 16,
+            "resize_and_pad_to_target": true,
+            "target_height": 600,
+            "target_width": 800
+        },
+        "instance_cropping": {
+            "center_on_part": null,
+            "crop_size": null,
+            "crop_size_detection_padding": 16
+        }
+    },
+    "model": {
+        "backbone": {
+            "leap": null,
+            "unet": {
+                "stem_stride": null,
+                "max_stride": 16,
+                "output_stride": 2,
+                "filters": 16,
+                "filters_rate": 2.0,
+                "middle_block": true,
+                "up_interpolate": true,
+                "stacks": 1
+            },
+            "hourglass": null,
+            "resnet": null,
+            "pretrained_encoder": null
+        },
+        "heads": {
+            "single_instance": null,
+            "centroid": {
+                "anchor_part": null,
+                "sigma": 5.0,
+                "output_stride": 2,
+                "offset_refinement": false
+            },
+            "centered_instance": null,
+            "multi_instance": null
+        }
+    },
+    "optimization": {
+        "preload_data": true,
+        "augmentation_config": {
+            "rotate": true,
+            "rotation_min_angle": -180.0,
+            "rotation_max_angle": 180.0,
+            "translate": false,
+            "translate_min": -5,
+            "translate_max": 5,
+            "scale": false,
+            "scale_min": 0.9,
+            "scale_max": 1.1,
+            "uniform_noise": false,
+            "uniform_noise_min_val": 0.0,
+            "uniform_noise_max_val": 10.0,
+            "gaussian_noise": false,
+            "gaussian_noise_mean": 5.0,
+            "gaussian_noise_stddev": 1.0,
+            "contrast": false,
+            "contrast_min_gamma": 0.5,
+            "contrast_max_gamma": 2.0,
+            "brightness": false,
+            "brightness_min_val": 0.0,
+            "brightness_max_val": 10.0,
+            "random_crop": false,
+            "random_crop_height": 256,
+            "random_crop_width": 256,
+            "random_flip": false,
+            "flip_horizontal": true
+        },
+        "online_shuffling": true,
+        "shuffle_buffer_size": 128,
+        "prefetch": true,
+        "batch_size": 4,
+        "batches_per_epoch": 200,
+        "min_batches_per_epoch": 200,
+        "val_batches_per_epoch": 10,
+        "min_val_batches_per_epoch": 10,
+        "epochs": 200,
+        "optimizer": "adam",
+        "initial_learning_rate": 0.0001,
+        "learning_rate_schedule": {
+            "reduce_on_plateau": true,
+            "reduction_factor": 0.5,
+            "plateau_min_delta": 1e-06,
+            "plateau_patience": 5,
+            "plateau_cooldown": 3,
+            "min_learning_rate": 1e-08
+        },
+        "hard_keypoint_mining": {
+            "online_mining": false,
+            "hard_to_easy_ratio": 2.0,
+            "min_hard_keypoints": 2,
+            "max_hard_keypoints": null,
+            "loss_scale": 5.0
+        },
+        "early_stopping": {
+            "stop_training_on_plateau": true,
+            "plateau_min_delta": 1e-06,
+            "plateau_patience": 10
+        }
+    },
+    "outputs": {
+        "save_outputs": true,
+        "run_name": "220708_114639.centroid.n=204",
+        "run_name_prefix": "",
+        "run_name_suffix": "",
+        "runs_folder": "/media/rory/Padlock_DT/Opto_Analysis/models",
+        "tags": [
+            ""
+        ],
+        "save_visualizations": true,
+        "delete_viz_images": true,
+        "zip_outputs": false,
+        "log_to_csv": true,
+        "checkpointing": {
+            "initial_model": false,
+            "best_model": true,
+            "every_epoch": false,
+            "latest_model": false,
+            "final_model": false
+        },
+        "tensorboard": {
+            "write_logs": false,
+            "loss_frequency": "epoch",
+            "architecture_graph": false,
+            "profile_graph": false,
+            "visualizations": true
+        },
+        "zmq": {
+            "subscribe_to_controller": true,
+            "controller_address": "tcp://127.0.0.1:9000",
+            "controller_polling_timeout": 10,
+            "publish_updates": true,
+            "publish_address": "tcp://127.0.0.1:9001"
+        }
+    },
+    "name": "",
+    "description": "",
+    "sleap_version": "1.1.5",
+    "filename": "/media/rory/Padlock_DT/Opto_Analysis/models/220708_114639.centroid.n=204/training_config.json"
+}
