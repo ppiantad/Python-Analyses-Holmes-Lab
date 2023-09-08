@@ -19,7 +19,7 @@ for root, dirs, files in os.walk(directory_path):
         continue
     if not mp4_files:
         print(f"There are no correctly named files to predict on")
-    else
+    else:
         for mp4_file in mp4_files:
             video_path = os.path.join(root, mp4_file)
             cmd = ['sleap-track', video_path, '-m', model_path_1, '-m', model_path_2]
