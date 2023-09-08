@@ -448,7 +448,7 @@ def main():
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
 
-    ROOT = "F:\BA-NAc CRISPR CNR1\BA-NA-Con-1\RDT D1"
+    ROOT = "D:\Behavior Videos\BLA-NAcShell ChrimsonR vs mCherry\RRD155\RDT OPTO CHOICE 2 mW"
 
     for root, dirs, files in os.walk(ROOT):
         slp_files = [f for f in files if f.endswith('.slp')]
