@@ -4,9 +4,9 @@ import subprocess
 
 
 
-directory_path = r"D:\Behavior Videos\BLA-PL ChrimsonR vs mCherry"
-model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_114639.centroid.n=204"
-model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_120742.centered_instance.n=204"
+directory_path = r"D:\SLEAP\RRD76\RDT OPTO CHOICE\test"
+model_path_1 = r"D:\SLEAP\Photometry_and_Inscopix_Model\220201_133640.centroid.n=2688"
+model_path_2 = r"D:\SLEAP\Photometry_and_Inscopix_Model\220201_141815.centered_instance.n=2688"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
@@ -17,8 +17,11 @@ for root, dirs, files in os.walk(directory_path):
     if slp_files:
         print(f"Skipping {root} directory as .slp file already exists.")
         continue
-    for mp4_file in mp4_files:
-        video_path = os.path.join(root, mp4_file)
-        cmd = ['sleap-track', video_path, '-m', model_path_1, '-m', model_path_2]
-        subprocess.run(cmd)
+    if not mp4_files:
+        print(f"There are no correctly named files to predict on")
+    else
+        for mp4_file in mp4_files:
+            video_path = os.path.join(root, mp4_file)
+            cmd = ['sleap-track', video_path, '-m', model_path_1, '-m', model_path_2]
+            subprocess.run(cmd)
 
