@@ -318,8 +318,8 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
 #This workflow has been optimized for a Windows file structure. It assumes you have your .avi files saved in a standardized way (see documentation) 
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
-    getcontext().prec = 10
-    ROOT = r"D:\SLEAP\RRD76"
+    getcontext().prec = 28
+    ROOT = r"D:\Behavior Videos\BLA-NAcShell retro-stGtACR vs retro-EGFP"
 
     for root, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if "not in final dataset" not in d]  

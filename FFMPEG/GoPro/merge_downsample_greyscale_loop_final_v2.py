@@ -6,7 +6,7 @@ import re
 import subprocess
 from pathlib import Path
 
-meta_folder_path = Path(r"D:\Behavior Videos\BLA stGtACR vs EYFP")
+meta_folder_path = Path(r"D:\Behavior Videos\BLA-NAcShell PPO vs EYFP")
 
 
 
@@ -21,7 +21,7 @@ def find_paths_endswith(root_path, endswith) -> list:
 def resize_video(video_path, new_w, new_h, out_path):
     #ffmpeg -i input.mp4 -vf scale=$w:$h <encoding-parameters> output.mp4
     command = ['ffmpeg', '-i', video_path, '-vf', f'scale={new_w}:{new_h}', os.path.join(video_path, out_path)]
-    #cmd = f"ffmpeg -i {video_path} -vf scale={new_w}:{new_h} -preset slow -crf 18 {out_path}"
+    #cmd = f"ffmpeg -i {video_patGIT h} -vf scale={new_w}:{new_h} -preset slow -crf 18 {out_path}"
     subprocess.run(command)
 
 def grayscale_video(video_path, out_path):
@@ -59,8 +59,8 @@ for root, dirs, files in os.walk(meta_folder_path):
             # create a text file containing the list of video files in order
         else:
             print(f"Found {len(filtered_vids)} video files to be processed.")
-            # sort the .MP4 files by creation time
-            filtered_vids.sort(key=lambda f: os.path.getctime(os.path.join(root, f)))
+            # sort the .MP4 files by creation time - 9/28/2023 changed this to getting the MODIFIED time, because some files the CREATED time was incorrect. will see if this helps 
+            filtered_vids.sort(key=lambda f: os.path.getmtime(os.path.join(root, f)))
             # create mylist.txt
             mylist_file = os.path.join(root, 'mylist.txt')
             with open(mylist_file, 'w') as f:
@@ -90,7 +90,7 @@ for root, dirs, files in os.walk(meta_folder_path):
             
             print(output_file)
             subprocess.run(['ffmpeg', '-f', 'concat', '-safe', '0', '-i', mylist_file, '-c', 'copy', output_file])
-            os.remove(mylist_file)
+            #os.remove(mylist_file)
 
             print("Video files merged successfully!")
 
