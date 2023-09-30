@@ -1,0 +1,12 @@
+inference:
+- data_path: Opto_Model_v2_labels_1.slp
+  models:
+  - models/230930_105814.single_instance
+  only_suggested_frames: false
+  output_path: Opto_Model_v2_labels_1.slp.predictions.slp
+  tracking: {}
+  type: labels
+training:
+- cfg: single_instance.json
+  run_path: models/230930_105814.single_instance
+  train_labels: Opto_Model_v2_labels_1.slp

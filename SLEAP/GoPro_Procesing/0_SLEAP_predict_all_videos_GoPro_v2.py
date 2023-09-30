@@ -24,6 +24,6 @@ for root, dirs, files in os.walk(directory_path):
     else:
         for mp4_file in mp4_files:
             video_path = os.path.join(root, mp4_file)
-            'sleap-track', '--tracking.clean_instance_count', instance_count , video_path, '-m', model_path_1, '-m', model_path_2, '--tracking.tracker simple'
-            
+            cmd = ['sleap-track', '--tracking.clean_instance_count', instance_count, video_path, '-m', model_path_1, '-m', model_path_2, '--tracking.tracker simple']
+            subprocess.run(cmd)
 
