@@ -4,9 +4,9 @@ import subprocess
 
 
 
-directory_path = r"D:\Behavior Videos\BLA-NAcShell retro-stGtACR vs retro-EGFP"
-model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_114639.centroid.n=204"
-model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_120742.centered_instance.n=204"
+directory_path = r"G:\Behavior Videos\BLA stGtACR vs EYFP\RRD306\SHOCK TEST TESTING SLEAP MODEL"
+model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model_v2\models\231016_123448.centroid.n=1185"
+model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model_v2\models\231016_130616.centered_instance.n=1185"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
@@ -22,6 +22,6 @@ for root, dirs, files in os.walk(directory_path):
     else:
         for mp4_file in mp4_files:
             video_path = os.path.join(root, mp4_file)
-            cmd = ['sleap-track', video_path, '-m', model_path_1, '-m', model_path_2]
+            cmd = ['sleap-track', video_path, '-m', model_path_1, '-m', model_path_2, '-n', "1"]
             subprocess.run(cmd)
 

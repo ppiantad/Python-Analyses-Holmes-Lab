@@ -6,7 +6,7 @@ import re
 import subprocess
 from pathlib import Path
 
-meta_folder_path = Path(r"D:\Behavior Videos\BLA-NAcShell PPO vs EYFP")
+meta_folder_path = Path(r"G:\Behavior Videos\BLA-PL ChrimsonR vs mCherry\RRD320\SHOCK TEST OR SLEAP TESTING 2")
 
 
 
@@ -27,6 +27,7 @@ def resize_video(video_path, new_w, new_h, out_path):
 def grayscale_video(video_path, out_path):
     #cmd = f"ffmpeg -i {video_path} -vf hue=s=0 {out_path}"
     command = ['ffmpeg', '-i', video_path, '-vf', f'hue=s={0}', os.path.join(video_path, out_path)]
+    #command = ['ffmpeg', '-i', video_path, '-vf', f'hue=s={0}, eq=gamma={1.5}:saturation={1.3}', os.path.join(video_path, out_path)]
     subprocess.run(command)
 
 
