@@ -5,10 +5,12 @@ import subprocess
 
 
 directory_path = r"D:\Behavior Videos\BLA-NAcShell ArchT vs eYFP\RRD116\SHOCK TEST"
-model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_114639.centroid.n=204"
+model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model_v2\models\231003_152523.single_instance.n=528"
 model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_120742.centered_instance.n=204"
 
 instance_count = 1
+
+frames = '100-400'
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
@@ -24,6 +26,6 @@ for root, dirs, files in os.walk(directory_path):
     else:
         for mp4_file in mp4_files:
             video_path = os.path.join(root, mp4_file)
-            cmd = ['sleap-track', '--tracking.clean_instance_count', instance_count, video_path, '-m', model_path_1, '-m', model_path_2, '--tracking.tracker simple']
+            cmd = ['sleap-track', video_path, '-frames', frames, '-m', model_path_1]
             subprocess.run(cmd)
 
