@@ -19,7 +19,7 @@ def find_gpio_paths(root_path, endswith: str):
 
 def main():
 
-    root_path = Path(r"G:\Inscopix to analyze")
+    root_path = Path(r"F:\NAcSh RG Inscopix")
     # find your file paths containing the motion_corrected.isxd ending
     
     print(root_path)

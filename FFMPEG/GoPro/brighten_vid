@@ -1,0 +1,60 @@
+import os
+from pathlib import Path
+from typing import List
+import glob
+import re
+import subprocess
+from pathlib import Path
+
+meta_folder_path = Path(r"H:\MATLAB\TDTbin2mat\Photometry\165\165-210113-140921")
+
+def find_paths_endswith(root_path, endswith) -> list:
+
+    files = glob.glob(
+        os.path.join(root_path, "**", "*%s") % (endswith), recursive=True,
+    )
+    return files
+
+
+def grayscale_video(video_path, out_path):
+    #cmd = f"ffmpeg -i {video_path} -vf hue=s=0 {out_path}"
+    #command = ['ffmpeg', '-i', video_path, '-vf', f'hue=s={0}', os.path.join(video_path, out_path)]
+    command = ['ffmpeg', '-i', video_path, '-vf', f'eq=brightness={0.06}:saturation={1.3}', os.path.join(video_path, out_path)]
+    subprocess.run(command)
+
+
+for root, dirs, files in os.walk(meta_folder_path):
+        # Exclude subfolders containing the exclusion string
+        dirs[:] = [d for d in dirs if "not in final dataset" not in d]        
+        
+        # look for .MP4 files in each subfolder
+
+        avi_files = [f for f in files if f.endswith('.avi')]
+
+        filtered_vids = []
+        for avi_file in avi_files:
+            #dir_path = os.path.dirname(mp4_file)
+            merged_files = [f for f in files if f.endswith("merged.MP4")]
+            resized_files = [f for f in files if f.endswith("_resized.MP4")]
+            resized_greyscaled_files = [f for f in files if f.endswith("_grayscaled.MP4")]
+
+            if not (merged_files or resized_files or resized_greyscaled_files):
+                filtered_vids.append(avi_file)
+
+                
+        #return filtered_vids
+
+
+        if len(filtered_vids) == 0:
+            print ("No MP4 files found to be processed.")
+            # create a text file containing the list of video files in order
+        else:
+            print(f"Found {len(filtered_vids)} video files to be processed.")
+
+        video_paths = find_paths_endswith(root, ".avi")
+        for video_path in video_paths:
+            grayscale_out_path = video_path.replace(".avi", "_brighter.avi")
+            grayscale_video(video_path, grayscale_out_path)
+            #delete the raw merged file because it is very large and likely won't be used
+            if video_path.endswith("_merged.MP4"):
+                os.remove(os.path.join(root, video_path))

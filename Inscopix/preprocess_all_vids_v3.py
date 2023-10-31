@@ -2,7 +2,8 @@ from pathlib import Path
 import os
 from typing import List
 #from preprocess import preprocess
-from preprocess_no_cnmfe import preprocess
+#from preprocess_no_cnmfe import preprocess
+from preprocess_no_cnmfe_dual_dynamic import preprocess
 import glob
 import shutil
 import isx 
@@ -25,11 +26,12 @@ def get_videos(root_path, endswith)-> list:
 
     for vid in vids:
         dir_path = os.path.dirname(vid)
+        di_files = [f for f in os.listdir(dir_path) if f.endswith("deinterleaved.isxd")]
         mc_files = [f for f in os.listdir(dir_path) if f.endswith("motion_corrected.isxd")]
         ds_files = [f for f in os.listdir(dir_path) if f.endswith("downsampled.isxd")]
         sf_files = [f for f in os.listdir(dir_path) if f.endswith("spatial_filtered.isxd")]
         tiff_files = [f for f in os.listdir(dir_path) if f.endswith("motion_corrected.tiff")]
-        if not (mc_files or ds_files or sf_files or tiff_files):
+        if not (di_files or mc_files or ds_files or sf_files or tiff_files):
             filtered_vids.append(vid)
 
             
@@ -38,7 +40,7 @@ def get_videos(root_path, endswith)-> list:
 
 
 def main() -> None:
-    root_path = Path(r"D:\Inscopix to analyze")
+    root_path = Path(r"F:\NAcSh RG Inscopix\RG-Insc-2")
     # ^Change this path to where your videos are stored
 
     print(root_path)
