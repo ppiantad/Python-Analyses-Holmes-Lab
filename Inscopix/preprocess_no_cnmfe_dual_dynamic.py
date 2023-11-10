@@ -60,7 +60,7 @@ def preprocess(in_path: Path, out_dir: Optional[Path] = None):
     def _downsample(
         in_vid: Path,
         out_vid: Path,
-        temporal_factor: float = 2,
+        temporal_factor: float = 1, #2
         spatial_factor: float = 4,
     ):
         print("downsampling...")
@@ -155,7 +155,7 @@ def preprocess(in_path: Path, out_dir: Optional[Path] = None):
     # CHANGE PARAMETERS HERE
     # slightlty better in catching missed cells, but leaves some out, still slightly less fewer misses as a net result
     # left a big cell out and one cell which pnr was low, so we lowered pnr
-    #  update 10/18/21 - need to be more lineant as to what is considered a cell
+    #  update 10/18/21 - need to be more lenient as to what is considered a cell
     num_threads = 5  # staying the same
     gSiz = 16  # cell diameter needs o account for bigger cells, was 16 10/19/21
     min_corr = 0.7

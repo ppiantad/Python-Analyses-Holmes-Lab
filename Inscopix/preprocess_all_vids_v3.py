@@ -40,7 +40,7 @@ def get_videos(root_path, endswith)-> list:
 
 
 def main() -> None:
-    root_path = Path(r"F:\NAcSh RG Inscopix\RG-Insc-2")
+    root_path = Path(r"G:\NAcSh RG Inscopix\RG-Insc-1")
     # ^Change this path to where your videos are stored
 
     print(root_path)
