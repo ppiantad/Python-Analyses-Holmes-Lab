@@ -6,7 +6,7 @@ import re
 import subprocess
 from pathlib import Path
 
-meta_folder_path = Path(r"G:\Behavior Videos\BLA-PL ChrimsonR vs mCherry\RRD320\SHOCK TEST OR SLEAP TESTING 2")
+meta_folder_path = Path(r"G:\Behavior Videos\BLA-NAcShell PPO vs EYFP")
 
 
 

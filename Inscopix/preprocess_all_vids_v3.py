@@ -2,8 +2,8 @@ from pathlib import Path
 import os
 from typing import List
 #from preprocess import preprocess
-#from preprocess_no_cnmfe import preprocess
-from preprocess_no_cnmfe_dual_dynamic import preprocess
+from preprocess_no_cnmfe import preprocess
+#from preprocess_no_cnmfe_dual_dynamic import preprocess
 import glob
 import shutil
 import isx 
@@ -31,22 +31,24 @@ def get_videos(root_path, endswith)-> list:
         ds_files = [f for f in os.listdir(dir_path) if f.endswith("downsampled.isxd")]
         sf_files = [f for f in os.listdir(dir_path) if f.endswith("spatial_filtered.isxd")]
         tiff_files = [f for f in os.listdir(dir_path) if f.endswith("motion_corrected.tiff")]
-        if not (di_files or mc_files or ds_files or sf_files or tiff_files):
+        gpio_intermediate_files = [f for f in os.listdir(dir_path) if f.endswith("gpio.isxd")]
+        if not (di_files or mc_files or ds_files or sf_files or tiff_files or gpio_intermediate_files):
             filtered_vids.append(vid)
 
             
     return filtered_vids
+    
             # process the video here
 
 
 def main() -> None:
-    root_path = Path(r"G:\NAcSh RG Inscopix\RG-Insc-1")
+    root_path = Path(r"F:\Inscopix to ready analyze")
     # ^Change this path to where your videos are stored
 
     print(root_path)
     endswith = ".isxd"
     filtered_vids = get_videos(root_path, endswith)
-
+    print(filtered_vids)
     # process only videos that meet the condition
     if filtered_vids is None:
         print("No video files found.")
