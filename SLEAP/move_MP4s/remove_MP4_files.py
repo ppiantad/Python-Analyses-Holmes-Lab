@@ -26,7 +26,7 @@ def move_video_file(folder_path):
         print(f"Moved {video_file} to {target_folder}")
 
 # Specify the root folder
-root_folder = r"G:\Behavior Videos\BLA stGtACR vs EYFP\RRD306"
+root_folder = r"G:\Behavior Videos\BLA stGtACR vs EYFP\RRD319"
 
 # Loop through all subfolders
 for subdir, dirs, files in os.walk(root_folder):

@@ -85,6 +85,20 @@ def slp_to_h5(in_path, out_path):
     cmd = ['sleap-convert', '--format', 'analysis', '-o', out_path, in_path]
     subprocess.run(cmd)
 
+def transpose_and_save_h5_generic(input_h5_filepath, output_h5_filepath):
+    with h5py.File(input_h5_filepath, "r") as f:
+        # Create a new HDF5 file for transposed data
+        with h5py.File(output_h5_filepath, "w") as h5_file_transposed:
+            # Copy attributes from the original file
+            for attr_name, attr_value in f.attrs.items():
+                h5_file_transposed.attrs[attr_name] = attr_value
+
+            # Iterate over datasets in the original file
+            for dataset_name, dataset in f.items():
+                # Transpose the dataset as necessary
+                transposed_data = np.transpose(dataset[:], axes=range(len(dataset.shape))[::-1])
+                # Create a new dataset in the transposed file
+                h5_file_transposed.create_dataset(dataset_name, data=transposed_data)
 
 
 def fill_missing(Y, kind="linear"):
@@ -319,7 +333,7 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
     getcontext().prec = 28
-    ROOT = r"D:\SLEAP\red light test vids\12272023"
+    ROOT = r"C:\Users\Patrick\AmadeusGPT\examples\my data (PTP)\RRD399"
 
     for root, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if "not in final dataset" not in d]  
@@ -369,6 +383,9 @@ def new_main():
                 #shutil.move(movie_path, new_movie_path)
                 # 2) Convert .slp to .h5
                 slp_to_h5(new_slp_path, h5_path)
+                # 2.1) Transpose and save as a new .h5 file
+                transposed_h5_path = h5_path.replace(".h5", "_transposed.h5")
+                transpose_and_save_h5_generic(h5_path, transposed_h5_path)
 
                 # 3) Extract speed
                 #meta_data(h5_path)
