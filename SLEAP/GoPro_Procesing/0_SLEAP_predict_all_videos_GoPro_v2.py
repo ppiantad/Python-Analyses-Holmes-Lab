@@ -4,7 +4,7 @@ import subprocess
 
 
 
-directory_path = r"D:\Behavior Videos\BLA-NAcShell ArchT vs eYFP\RRD116\SHOCK TEST"
+directory_path = r"D:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-25"
 model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model_v2\models\231003_152523.single_instance.n=528"
 model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models\Opto_Model\220708_120742.centered_instance.n=204"
 
