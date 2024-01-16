@@ -1,0 +1,42 @@
+import os
+import imagej
+import imglyb
+import numpy as np
+from jnius import autoclass
+
+# Set the input and output folders
+input_folder = r'D:\for batch testing'  # Update with your input folder path
+output_folder = r'D:\for batch testing\combined files'  # Update with your output folder path
+
+# Initialize ImageJ
+ij = imagej.init(r'C:\Users\dicbr\Downloads\fiji-win64\Fiji.app')  # Update with your Fiji.app path
+
+# Get a list of all .tif files in the input folder
+tif_files = [f for f in os.listdir(input_folder) if f.endswith('.tif')]
+
+# Process each mouse's files
+for tif_file in tif_files:
+    # Open the .tif file using Bio-Formats
+    bf_open = ij.io().open(input_folder + os.sep + tif_file)
+    img = np.asarray(bf_open.get(0))
+
+    # Convert the image to an ImageJ dataset
+    dataset = imglyb.util.to_imglib2(img, imglyb.util.get_access_mode(1))
+
+    # Create a new image in ImageJ
+    imp = ij.op().run('create.img', dataset)
+
+    # Combine the open images into a stack
+    stack = ij.op().run('create.imgList', [imp])
+    ij.ui().show('CombinedImages', stack)
+
+    # Save the combined image
+    output_file = os.path.join(output_folder, os.path.splitext(tif_file)[0] + '_combined.tif')
+    imp = ij.ui().getImage('CombinedImages')
+    ij.io().save(imp, output_file)
+
+    # Close the images in ImageJ
+    ij.ui().closeAll()
+
+# Clean up and exit ImageJ
+ij.dispose()
