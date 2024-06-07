@@ -4,7 +4,7 @@ import subprocess
 
 
 
-directory_path = r"G:\Behavior Videos\BLA hM4Di vs mCherry"
+directory_path = r"D:\risk videos\BLA CNO vs mCherry"
 model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_145928.centroid.n=1185"
 model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_153043.centered_instance.n=1185"
 
