@@ -4,8 +4,8 @@ import subprocess
 
 
 
-directory_path = r"E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618\B51618_Day4_Test"
-model_path_1 = r"E:\SLEAP\models\240919_103321.single_instance.n=100"
+directory_path = r"E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data"
+model_path_1 = r"E:\SLEAP\models\240920_105935.single_instance.n=523"
 #model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_153043.centered_instance.n=1185"
 
 for root, dirs, files in os.walk(directory_path):

@@ -42,7 +42,7 @@ def get_videos(root_path, endswith)-> list:
 
 
 def main() -> None:
-    root_path = Path(r"D:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618\B51618_Day5_Test\Imaging\raw_data\other_data")
+    root_path = Path(r"E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618\B51618_Day5_Test\Imaging\raw_data\other_data")
     # ^Change this path to where your videos are stored
 
     print(root_path)
