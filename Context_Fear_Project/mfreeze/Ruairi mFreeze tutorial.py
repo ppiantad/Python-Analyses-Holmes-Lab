@@ -9,8 +9,8 @@ from mfreeze.utils import crop_set_same
 
 
 file_extention = ".avi"
-input_dir = Path(r"E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618\B51618_Day3_Noon\Behavior\raw_bonsai_data")
-report_dir = Path(r"E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618\B51618_Day3_Noon\Behavior\raw_bonsai_data\freeze_vid")
+input_dir = Path(r"F:\Maddy Pilot\Abbreviated_Pilot\D00429\D1Afternoon")
+report_dir = Path(r"F:\Maddy Pilot\Abbreviated_Pilot\D00429\D1Afternoon\freeze_vid")
 
 
 report_dir.mkdir(exist_ok=True)

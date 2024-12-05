@@ -10,7 +10,7 @@ from mfreeze.utils import crop_set_same
 
 start_frame = 0
 # higher values = more sensitive? 
-freeze_threshold = 1000
+freeze_threshold = 150
 
 
 
@@ -18,7 +18,7 @@ file_extention = ".avi"
 
 report_dir_label = "freeze_vid"
 
-directory_path = r"E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data"
+directory_path = r"D:\Maddy Pilot\full_pilot"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
@@ -29,7 +29,12 @@ for root, dirs, files in os.walk(directory_path):
         print(f"Skipping {root} directory as it is 'other_data'.")
         continue
 
-    mp4_files = [f for f in files if f.endswith('.avi') and f != "freeze_video.avi"]
+    # Skip processing mp4_files if the folder contains a subfolder named "freeze_vid"
+    if "freeze_vid" in dirs:
+        print(f"Skipping {root} directory as it contains 'freeze_vid' subfolder.")
+        continue
+
+    mp4_files = [f for f in files if f.endswith('.avi') and "freeze_video" not in f]
 
     if not mp4_files:
         print(f"There are no correctly named files to predict on")

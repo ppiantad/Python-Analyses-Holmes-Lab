@@ -13,13 +13,13 @@ def find_gpio_paths(root_path, endswith: str):
         dir_path = os.path.dirname(gpio_file)
         gpio_exists = [f for f in os.listdir(dir_path) if f.endswith("gpio.csv")]
 
-        if not (gpio_exists):
+        if not gpio_exists and "EPM" not in dir_path:
             gpio_files_filtered.append(gpio_file)
     return gpio_files_filtered
 
 def main():
 
-    root_path = Path(r"D:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618\B51618_Day2_Morning\Imaging")
+    root_path = Path(r"D:\Context Data\PFC Last\Raw Data\PFC and DRN")
     # find your file paths containing the motion_corrected.isxd ending
     
     print(root_path)
