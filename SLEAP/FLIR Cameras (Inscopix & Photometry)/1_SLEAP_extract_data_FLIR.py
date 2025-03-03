@@ -229,7 +229,7 @@ def visualize_velocity_one_node(node_name, x_axis_time, x_coord_cm, y_coord_cm, 
 """Will call on export to csv for every node"""
 
 
-def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fps):
+def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session, video_length_seconds,fps):
     with h5py.File(h5_filepath, "r") as f:
         dset_names = list(f.keys())
         locations = fill_missing(f["tracks"][:].T)
@@ -267,18 +267,19 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
         range_min = 0
         range_max = Decimal(len(vel_mouse)) / Decimal(str(fps))
         print("Range_max: ", range_max)
-
+        frames = [i for i in range(1, len(vel_mouse)+1)]
+        print("Frames: ", max(frames))
         # step is 30 Hz, so 0.033 s in 1 frame
         # step = float(1/fps)
         # works - adjusted x_axis_time so it starts at step, not at 0. also adjusted frames because the range starts at 1, so it needs to go to the length
         # of vel_mouse + 1
+        # seems to work as of 2024-03-13 by changing to max(frames) instead of what it was before
         step = Decimal('1') / Decimal(str(fps))
         x_axis_time = [
-            Decimal(str(step)) * i for i in range(1, int(range_max / step) + 1)
+            Decimal(str(step)) * i for i in range(1, int(max(frames)) + 1)
         ]
         print(len(x_axis_time))
-        frames = [i for i in range(1, len(vel_mouse)+1)]
-        print("Frames: ", max(frames))
+
 
         ######## EXPORTING CSV, COORD, VEL, TRACKS GRAPHS FOR EACH NODE ########
         csv_out = f"{mouse}_{session}_{name}_sleap_data.csv"
@@ -316,8 +317,8 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
 #This workflow has been optimized for a Windows file structure. It assumes you have your .avi files saved in a standardized way (see documentation) 
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
-    getcontext().prec = 10
-    ROOT = r"D:\Inscopix vids to combine"
+    getcontext().prec = 28
+    ROOT = r"F:\MATLAB\TDTbin2mat\Photometry\RRD341\RRD341-230417-134252"
 
     for root, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if "not in final dataset" not in d]  
@@ -352,6 +353,16 @@ def new_main():
             # print the FPS
             print("FPS of video file: ", movie_fps)
             # release the video capture object and close all windows
+
+            # Get the total number of frames in the video
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            # Calculate the length of the video in seconds
+            video_length_seconds = total_frames / movie_fps
+
+            # Print the FPS and length of the video
+            print("FPS of video file:", movie_fps)
+            print("Length of video file (seconds):", video_length_seconds)
             cap.release()
             #cv2.destroyAllWindows()
 
@@ -372,7 +383,7 @@ def new_main():
                 # 3) Extract speed
                 #meta_data(h5_path)
                 
-                export_sleap_data_mult_nodes(h5_path, SESSION_ROOT, mouse, session, fps=movie_fps)
+                export_sleap_data_mult_nodes(h5_path, SESSION_ROOT, mouse, session, video_length_seconds, fps=movie_fps)
                 #export_sleap_data_mult_nodes_body(h5_path, SESSION_ROOT,mouse, fps=30)
             except Exception as e:
                 print(e)

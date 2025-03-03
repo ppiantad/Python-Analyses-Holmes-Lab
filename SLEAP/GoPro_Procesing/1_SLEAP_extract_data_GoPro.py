@@ -319,7 +319,7 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
     getcontext().prec = 28
-    ROOT = r"D:\SLEAP\red light test vids\12272023"
+    ROOT = r"F:\risk videos\BLA hM4Di vs mCherry\RRD424\RDT D2 CNO"
 
     for root, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if "not in final dataset" not in d]  

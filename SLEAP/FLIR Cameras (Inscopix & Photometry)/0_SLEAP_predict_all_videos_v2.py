@@ -5,7 +5,7 @@ import subprocess
 
 def new_main():
 
-    directory_path = r"D:\Inscopix vids to combine"
+    directory_path = r"I:\MATLAB\Sean CNMFe\RG-Insc"
     model_path_1 = "D:/SLEAP/Photometry_and_Inscopix_Model/220201_133640.centroid.n=2688"
     model_path_2 = "D:/SLEAP/Photometry_and_Inscopix_Model/220201_141815.centered_instance.n=2688"
 
