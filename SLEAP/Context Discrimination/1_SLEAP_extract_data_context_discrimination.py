@@ -319,7 +319,7 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
     getcontext().prec = 28
-    ROOT = r"E:\risk videos\BLA stGtACR vs EGFP"
+    ROOT = r"D:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data\B51618"
 
     for root, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if "not in final dataset" not in d]  
@@ -334,7 +334,7 @@ def new_main():
             print("Current sleap_file", slp_file)
             slp_filename = slp_file.split("/")[-1]
             mouse = slp_file_parsing(slp_filename)
-            session = os.path.basename(root)  # Extract the last directory name from the root path
+            session = 'SLEAP_data'  # Extract the last directory name from the root path
             print(f"mouse: {mouse} || session: {session}")
             SESSION_ROOT = os.path.join(root, session).replace("\\","/")
             print(f"SESSION_ROOT: {SESSION_ROOT}")
@@ -343,9 +343,10 @@ def new_main():
             h5_path = new_slp_path.replace(".slp", ".h5")
             print(f"h5_path: {h5_path}")
 
-            movie_filename = re.sub(r'(?i)\.mp4\.predictions\.slp', '.MP4', slp_filename)
-
+            movie_filename = re.sub(r'(?i)\.avi\.predictions\.slp', '.avi', slp_filename)
+            print(f"movie_filename: {movie_filename}")
             movie_path = os.path.join(root, movie_filename).replace("\\","/")
+            
             # read the video file
             cap = cv2.VideoCapture(movie_path)
             # get the frames per second (FPS) of the video
@@ -364,12 +365,12 @@ def new_main():
                 # 1) move the slp file
                 os.makedirs(SESSION_ROOT, exist_ok=True)
                 print(f"old path: {old_slp_path} || new path: {new_slp_path}")
-
+                print(movie_path)
                 shutil.move(old_slp_path, new_slp_path)
                 #shutil.move(movie_path, new_movie_path)
                 # 2) Convert .slp to .h5
                 slp_to_h5(new_slp_path, h5_path)
-
+            
                 # 3) Extract speed
                 #meta_data(h5_path)
                 
