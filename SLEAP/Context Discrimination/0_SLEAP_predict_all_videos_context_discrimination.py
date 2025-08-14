@@ -4,8 +4,8 @@ import subprocess
 
 
 
-directory_path = r"D:\DREADD"
-model_path_1 = r"D:\SLEAP\models\250303_093429.single_instance.n=531_for_TOO_bright_vids"
+directory_path = r"E:\Inscopix Mice 072025"
+model_path_1 = r"E:\SLEAP\models\250303_093429.single_instance.n=531_for_TOO_bright_vids"
 #model_path_2 = r"E:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_153043.centered_instance.n=1185"
 
 for root, dirs, files in os.walk(directory_path):
@@ -17,13 +17,7 @@ for root, dirs, files in os.walk(directory_path):
         print(f"Skipping {root} directory as it is 'other_data'.")
         continue
 
-    if "other vids" in root:
-        print(f"Skipping {root} directory as it is 'other vids'.")
-        continue
 
-    if "other" in root: 
-        print(f"Skipping {root} directory as it is 'other'.")
-        continue
 
     mp4_files = [f for f in files if f.endswith('.avi') and "freeze_video" not in f]
     # Check if any .slp file exists in the directory

@@ -18,7 +18,7 @@ file_extention = ".avi"
 
 report_dir_label = "freeze_vid"
 
-directory_path = r"D:\DREADD"
+directory_path = r"E:\Inscopix Mice 072025"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
@@ -63,7 +63,8 @@ for root, dirs, files in os.walk(directory_path):
                 
                 detector.detect_motion()
                 detector.detect_freezes()
-                detector.save_video()
+                # uncomment below if you want to write videos to file - takes longer, but sometimes worth it for vizualization
+                #detector.save_video()
                 dff = detector.generate_report()
                 file_name = f"{Path(current_video).stem}_{freeze_threshold}_detector_report.csv"
                 path_for_csv = os.path.join(report_dir, file_name)

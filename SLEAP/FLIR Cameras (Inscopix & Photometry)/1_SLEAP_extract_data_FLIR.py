@@ -317,7 +317,7 @@ def export_sleap_data_mult_nodes(h5_filepath, session_root_path,mouse,session,fp
 #It also assumes your data are organized with a folder for each mouse, and then a folder for each session, with one .avi and one .slp file in each folder.
 def new_main():
     getcontext().prec = 10
-    ROOT = r"D:\MATLAB\Sean CNMFe\BLA-NAcSh\BLA-Insc-52\RDT D2"
+    ROOT = r"D:\MATLAB\TDTbin2mat\SLEAP Data_processed"
 
     for root, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if "not in final dataset" not in d]  

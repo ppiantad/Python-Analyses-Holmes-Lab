@@ -3,7 +3,7 @@ import json
 import subprocess
 
 # Define the root directory where the search should start
-root_dir = r"D:\Context Data\PFC Last\Raw Data\PFC and DRN"
+root_dir = r"E:\Inscopix Mice 072025"
 
 # Define the target filename to look for
 target_filename = "context_switch_two.avi"
@@ -70,6 +70,13 @@ for root, _, files in os.walk(root_dir):
         print(f"Skipping folder {root}, fixed file already exists.")
         continue
     
-    if target_filename in files:
-        video_path = os.path.join(root, target_filename)
-        process_video(video_path)
+    merged_files = [f for f in files if f.endswith("context_switch_two.avi")]
+    
+    for video_file in merged_files:
+        video_path = os.path.join(root, video_file)
+        process_video(video_path) 
+
+    
+  #  if target_filename in files:
+   #     video_path = os.path.join(root, target_filename)
+    #    process_video(video_path)

@@ -5,7 +5,7 @@ import subprocess
 
 def new_main():
 
-    directory_path = r"D:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-29"
+    directory_path = r"D:\MATLAB\TDTbin2mat\SLEAP Data_processed\D1-eOP-6\Pre-RDT RM"
     model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Photometry_and_Inscopix_Model\220201_133640.centroid.n=2688"
     model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Photometry_and_Inscopix_Model\220201_141815.centered_instance.n=2688"
 
