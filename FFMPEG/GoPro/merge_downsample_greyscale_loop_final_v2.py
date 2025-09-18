@@ -23,7 +23,7 @@ def find_paths_endswith(root_path, endswith) -> list:
 def resize_video(video_path, new_w, new_h, out_path):
     #ffmpeg -i input.mp4 -vf scale=$w:$h <encoding-parameters> output.mp4
     command = ['ffmpeg', '-i', video_path, '-vf', f'scale={new_w}:{new_h}', os.path.join(video_path, out_path)]
-    #cmd = f"ffmpeg -i {video_patGIT h} -vf scale={new_w}:{new_h} -preset slow -crf 18 {out_path}"
+    #cmd = f"ffmpeg -i {video_patGIT h} -vf scale={new_w}:{new_h} -preset slow -crf 18 {potsout_path}"
     subprocess.run(command)
 
 def grayscale_video(video_path, out_path):

@@ -18,7 +18,7 @@ file_extention = ".avi"
 
 report_dir_label = "freeze_vid"
 
-directory_path = r"E:\Inscopix Mice 072025"
+directory_path = r"E:\RE DREADD mice"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
