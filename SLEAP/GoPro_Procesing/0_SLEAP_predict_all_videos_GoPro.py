@@ -4,7 +4,7 @@ import subprocess
 
 
 
-directory_path = r"F:\risk videos\BLA PdCO vs mCherry"
+directory_path = r"F:\STR RDT Experiment"
 model_path_1 = r"D:\PythonAnalyses\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_145928.centroid.n=1185"
 model_path_2 = r"D:\PythonAnalyses\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_153043.centered_instance.n=1185"
 

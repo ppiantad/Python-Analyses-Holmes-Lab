@@ -10,7 +10,9 @@ from mfreeze.utils import crop_set_same
 
 start_frame = 0
 # higher values = more sensitive? 
-freeze_threshold = 150
+# 150 works well for non-headcap normal videos
+# 1000 works well for tethered (1p imaging) videos
+freeze_threshold = 1000
 
 
 
@@ -18,7 +20,7 @@ file_extention = ".avi"
 
 report_dir_label = "freeze_vid"
 
-directory_path = r"D:\Maddy Pilot\full_pilot"
+directory_path = r"F:\Context Data\PFC Last\Raw Data\PFC and DRN"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string

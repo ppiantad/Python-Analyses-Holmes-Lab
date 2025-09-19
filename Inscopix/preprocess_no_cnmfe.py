@@ -4,9 +4,6 @@ import os
 import isx
 
 
-isxd_extensions = os.path.splitext(os.path.basename(str(Path)))
-filename_new = os.path.join(isxd_extensions[0]+ "_downsampled" + isxd_extensions[1])
-
 def preprocess(in_path: Path, out_dir: Optional[Path] = None):
     """Preprocess a single insopix video
 
@@ -15,28 +12,21 @@ def preprocess(in_path: Path, out_dir: Optional[Path] = None):
         out_dir (Optional[Path], optional): Path where files will be saved. Defaults to directory of input video.
     """
 
-    #def _isxd_names(
-    #    isxd_extensions = os.path.splitext(os.path.basename(str(Path)))):
-    #    return isxd_extensions
-    
-
     def _generate_default_outpath(inpath: Path) -> Path:
         return inpath.parent
 
     def _create_paths(in_path: Path, out_path: Path) -> Dict[str, Path]:
-        isxd_extensions = os.path.splitext(os.path.basename(in_path))
-        print(list(isxd_extensions))
+        # Get the base filename without extension from the INPUT file
+        base_filename = in_path.stem  # This gets filename without extension
+        print(f"Base filename: {base_filename}")
+        
         out = {}
-        #out["downsample_path"] = os.path.join(isxd_extensions[0]+ "_downsampled" + isxd_extensions[1])
-        mouse_name = str(out_path).split("/")[-1].split("_")[1:]
-        print(mouse_name)
-        actual_name_str = ("_").join(mouse_name)
-        print(actual_name_str)
-        out["downsample_path"] = out_path / f"{actual_name_str}_{isxd_extensions[0]}_downsampled.isxd"
-        out["spatial_filter_path"] = out_path / f"{actual_name_str}_{isxd_extensions[0]}_spatial_filtered.isxd"
-        out["motion_correct_path"] = out_path / f"{actual_name_str}_{isxd_extensions[0]}_motion_corrected.isxd"
-        out["tiff_path"] = out_path / f"{actual_name_str}_{isxd_extensions[0]}_motion_corrected.tiff"
-        #out["cnmfe_path"] = out_path / f"{actual_name_str}_{isxd_extensions[0]}_cnmfe_cellset.isxd"
+        out["downsample_path"] = out_path / f"{base_filename}_downsampled.isxd"
+        out["spatial_filter_path"] = out_path / f"{base_filename}_spatial_filtered.isxd"
+        out["motion_correct_path"] = out_path / f"{base_filename}_motion_corrected.isxd"
+        out["tiff_path"] = out_path / f"{base_filename}_motion_corrected.tiff"
+        
+        # Remove existing files if they exist
         for path in out.values():
             if path.exists():
                 path.unlink()
@@ -94,9 +84,6 @@ def preprocess(in_path: Path, out_dir: Optional[Path] = None):
             str(out_vid),
         )
 
-        
-
-
     def _cnmfe(
         in_vid: Path,
         out_dir: Path,
@@ -138,16 +125,13 @@ def preprocess(in_path: Path, out_dir: Optional[Path] = None):
         out_dir = _generate_default_outpath(in_path)
 
     # CHANGE PARAMETERS HERE
-    # slightlty better in catching missed cells, but leaves some out, still slightly less fewer misses as a net result
-    # left a big cell out and one cell which pnr was low, so we lowered pnr
-    #  update 10/18/21 - need to be more lineant as to what is considered a cell
-    num_threads = 5  # staying the same
-    gSiz = 16  # cell diameter needs o account for bigger cells, was 16 10/19/21
+    num_threads = 5  
+    gSiz = 16  
     min_corr = 0.7
-    min_pnr = 8  # before was 8 10/18/21, 5 on 10/19/21, changed it back to 8 11/22/21
+    min_pnr = 8  
     bg_spatial_subsampling = 1
     ring_size_factor = 1.125
-    gSig = 4  # 4 10/18/21
+    gSig = 4  
     closing_kernel_size = 0
     merge_threshold = 0.3
     processing_mode = "parallel_patches"
@@ -155,9 +139,7 @@ def preprocess(in_path: Path, out_dir: Optional[Path] = None):
     patch_overlap = 20
     output_unit_type = "df_over_noise"
     
-   
     out_paths = _create_paths(in_path=in_path, out_path=out_dir)
-    
     
     _downsample(in_path, out_paths["downsample_path"])
     _spatial_filter(out_paths["downsample_path"], out_paths["spatial_filter_path"])
