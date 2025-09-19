@@ -20,7 +20,7 @@ file_extention = ".avi"
 
 report_dir_label = "freeze_vid"
 
-directory_path = r"F:\Context Data\PFC Last\Raw Data\PFC and DRN"
+directory_path = r"E:\RE DREADD mice"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
@@ -32,8 +32,16 @@ for root, dirs, files in os.walk(directory_path):
         continue
 
     # Skip processing mp4_files if the folder contains a subfolder named "freeze_vid"
-    if "freeze_vid" in dirs:
-        print(f"Skipping {root} directory as it contains 'freeze_vid' subfolder.")
+    if "freeze_vid" in dirs or "other_vids" in dirs:
+        print(f"Skipping {root} directory as it contains 'freeze_vid' or 'other_vids' subfolder.")
+        continue
+
+    if "other vids" in root:
+        print(f"Skipping {root} directory as it is 'other vids'.")
+        continue
+
+    if "other" in root: 
+        print(f"Skipping {root} directory as it is 'other'.")
         continue
 
     mp4_files = [f for f in files if f.endswith('.avi') and "freeze_video" not in f]
@@ -57,7 +65,8 @@ for root, dirs, files in os.walk(directory_path):
                 
                 detector.detect_motion()
                 detector.detect_freezes()
-                detector.save_video()
+                # uncomment below if you want to write videos to file - takes longer, but sometimes worth it for vizualization
+                #detector.save_video()
                 dff = detector.generate_report()
                 file_name = f"{Path(current_video).stem}_{freeze_threshold}_detector_report.csv"
                 path_for_csv = os.path.join(report_dir, file_name)

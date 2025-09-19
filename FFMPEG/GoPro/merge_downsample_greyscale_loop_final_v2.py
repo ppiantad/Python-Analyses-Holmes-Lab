@@ -5,8 +5,10 @@ import glob
 import re
 import subprocess
 from pathlib import Path
+import json
+from datetime import datetime
 
-meta_folder_path = Path(r"F:\STR RDT Experiment")
+meta_folder_path = Path(r"E:\risk videos\BLA-PL PV+ Hajos")
 
 
 
@@ -21,7 +23,7 @@ def find_paths_endswith(root_path, endswith) -> list:
 def resize_video(video_path, new_w, new_h, out_path):
     #ffmpeg -i input.mp4 -vf scale=$w:$h <encoding-parameters> output.mp4
     command = ['ffmpeg', '-i', video_path, '-vf', f'scale={new_w}:{new_h}', os.path.join(video_path, out_path)]
-    #cmd = f"ffmpeg -i {video_patGIT h} -vf scale={new_w}:{new_h} -preset slow -crf 18 {out_path}"
+    #cmd = f"ffmpeg -i {video_patGIT h} -vf scale={new_w}:{new_h} -preset slow -crf 18 {potsout_path}"
     subprocess.run(command)
 
 def grayscale_video(video_path, out_path):
@@ -30,7 +32,49 @@ def grayscale_video(video_path, out_path):
     #command = ['ffmpeg', '-i', video_path, '-vf', f'hue=s={0}, eq=gamma={1.5}:saturation={1.3}', os.path.join(video_path, out_path)]
     subprocess.run(command)
 
-
+def get_media_creation_time(video_path):
+    """Get the media creation time from video metadata using ffprobe"""
+    try:
+        # Run ffprobe to get metadata
+        cmd = [
+            'ffprobe', 
+            '-v', 'quiet',
+            '-print_format', 'json',
+            '-show_format',
+            video_path
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        metadata = json.loads(result.stdout)
+        
+        # Look for creation time in format metadata
+        if 'format' in metadata and 'tags' in metadata['format']:
+            tags = metadata['format']['tags']
+            
+            # Common creation time tag names (case-insensitive search)
+            creation_keys = ['creation_time', 'date', 'com.apple.quicktime.creationdate']
+            
+            for key in tags:
+                if key.lower() in [k.lower() for k in creation_keys]:
+                    time_str = tags[key]
+                    # Parse the timestamp (handle different formats)
+                    try:
+                        # Try ISO format first (most common)
+                        if 'T' in time_str:
+                            dt = datetime.fromisoformat(time_str.replace('Z', '+00:00'))
+                        else:
+                            # Try other common formats
+                            dt = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
+                        return dt.timestamp()
+                    except ValueError:
+                        continue
+        
+        # Fallback to file modification time if no media creation time found
+        return os.path.getmtime(video_path)
+        
+    except (subprocess.CalledProcessError, json.JSONDecodeError, FileNotFoundError):
+        # Fallback to file modification time if ffprobe fails
+        return os.path.getmtime(video_path)
 
 
 for root, dirs, files in os.walk(meta_folder_path):
@@ -61,7 +105,10 @@ for root, dirs, files in os.walk(meta_folder_path):
         else:
             print(f"Found {len(filtered_vids)} video files to be processed.")
             # sort the .MP4 files by creation time - 9/28/2023 changed this to getting the MODIFIED time, because some files the CREATED time was incorrect. will see if this helps 
-            filtered_vids.sort(key=lambda f: os.path.getmtime(os.path.join(root, f)))
+            # 8/14/2025: had to change this because again there was a problem with MODIFIED time, but it looks like the property "Media created" should be correct?
+            filtered_vids.sort(key=lambda f: get_media_creation_time(os.path.join(root, f)))
+            
+            #filtered_vids.sort(key=lambda f: os.path.getmtime(os.path.join(root, f)))
             # create mylist.txt
             mylist_file = os.path.join(root, 'mylist.txt')
             with open(mylist_file, 'w') as f:

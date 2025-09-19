@@ -4,9 +4,9 @@ import subprocess
 
 
 
-directory_path = r"F:\STR RDT Experiment"
-model_path_1 = r"D:\PythonAnalyses\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_145928.centroid.n=1185"
-model_path_2 = r"D:\PythonAnalyses\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_153043.centered_instance.n=1185"
+directory_path = r"E:\risk videos\BLA-PL PV+ Hajos"
+model_path_1 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_145928.centroid.n=1185"
+model_path_2 = r"C:\Python_Analyses\Python-Analyses-Holmes-Lab\SLEAP\SLEAP_models_for_github\Opto_Model_v2\231016_153043.centered_instance.n=1185"
 
 for root, dirs, files in os.walk(directory_path):
     # Exclude subfolders containing the exclusion string
