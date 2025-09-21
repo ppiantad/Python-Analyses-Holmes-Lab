@@ -841,8 +841,8 @@ class ApproachAbortDetector:
         if touchscreen_file is None:
             # Try both possible locations
             possible_files = [
-                os.path.join(self.base_path, "RRD414 05142024 ABET.csv"),
-                os.path.join(os.path.dirname(self.base_path), "RRD414 05142024 ABET.csv")
+                os.path.join(self.base_path, "D1-10 02072020.csv"),
+                os.path.join(os.path.dirname(self.base_path), "D1-10 02072020.csv")
             ]
             
             for file_path in possible_files:
@@ -1331,7 +1331,7 @@ class ApproachAbortDetector:
 
 # Example usage with suppression
 if __name__ == "__main__":
-    base_path = r"C:\Users\Patrick\Desktop\RRD414\RDT D1 CNO\RDT D1 CNO"
+    base_path = r"C:\Users\Patrick\Desktop\RDT D1"
     
     detector = ApproachAbortDetector(base_path)
     
@@ -1340,7 +1340,7 @@ if __name__ == "__main__":
         detector.run_analysis(
             num_clips=20,
             proximity_threshold=60,      # Distance threshold to screens
-            velocity_threshold=15,       # Movement speed threshold
+            velocity_threshold=150,       # Movement speed threshold
             suppression_frames=30        # Minimum frames between events (prevents duplicates)
         )
         
