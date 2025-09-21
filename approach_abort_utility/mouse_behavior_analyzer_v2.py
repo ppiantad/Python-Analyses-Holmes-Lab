@@ -183,8 +183,10 @@ class ApproachAbortDetector:
         print("Screen annotation complete")
         return self.touchscreen_lines
     
-    def detect_houselight_onset(self, search_frames=2000):
-        """Detect houselight onset for timestamp alignment"""
+    def detect_houselight_onset(self, search_frames=2000, min_change_threshold=5):
+        """
+        Detect houselight onset with interactive selection from ALL abrupt brightness changes
+        """
         cap = cv2.VideoCapture(self.video_path)
         if not cap.isOpened():
             return None
@@ -204,30 +206,218 @@ class ApproachAbortDetector:
         
         cap.release()
         
-        # Find largest brightness change
-        brightness_changes = np.diff(brightness_values)
-        max_change_idx = np.argmax(brightness_changes)
-        max_change_frame = max_change_idx + 1
-        houselight_time = self.frame_to_timestamp(max_change_frame)
+        print(f"Analyzed {len(brightness_values)} frames")
         
-        # Show plot
-        plt.figure(figsize=(12, 4))
-        plt.plot(range(len(brightness_values)), brightness_values)
-        plt.axvline(x=max_change_frame, color='red', linestyle='--', 
-                   label=f'Max change at frame {max_change_frame}')
-        plt.xlabel('Frame Number')
-        plt.ylabel('Brightness')
-        plt.title('Video Brightness Over Time')
-        plt.legend()
+        # Calculate frame-to-frame brightness changes
+        brightness_changes = np.diff(brightness_values)
+        
+        print(f"Calculated {len(brightness_changes)} brightness changes")
+        print(f"Change range: {brightness_changes.min():.1f} to {brightness_changes.max():.1f}")
+        
+        # Find ALL changes above threshold - EVERY SINGLE ONE
+        all_change_indices = []
+        all_change_magnitudes = []
+        
+        for i in range(len(brightness_changes)):
+            change = brightness_changes[i]
+            if abs(change) >= min_change_threshold:
+                all_change_indices.append(i)
+                all_change_magnitudes.append(change)
+        
+        print(f"Found {len(all_change_indices)} changes above threshold ±{min_change_threshold}")
+        
+        if len(all_change_indices) == 0:
+            print(f"No changes found above threshold {min_change_threshold}. Lowering threshold to 1...")
+            min_change_threshold = 1
+            for i in range(len(brightness_changes)):
+                change = brightness_changes[i]
+                if abs(change) >= min_change_threshold:
+                    all_change_indices.append(i)
+                    all_change_magnitudes.append(change)
+            print(f"With threshold {min_change_threshold}: found {len(all_change_indices)} changes")
+        
+        if len(all_change_indices) == 0:
+            print("No brightness changes detected at all")
+            return None
+        
+        # Create change data for plotting
+        all_changes = []
+        for i, change_idx in enumerate(all_change_indices):
+            frame_num = change_idx + 1  # +1 because diff shifts indices
+            time_sec = self.frame_to_timestamp(frame_num)
+            magnitude = all_change_magnitudes[i]
+            
+            all_changes.append({
+                'frame': frame_num,
+                'time': time_sec,
+                'magnitude': magnitude,
+                'type': 'increase' if magnitude > 0 else 'decrease',
+                'index': change_idx
+            })
+        
+        # Sort by time
+        all_changes.sort(key=lambda x: x['time'])
+        
+        print(f"\nDetected {len(all_changes)} brightness changes:")
+        for i, change in enumerate(all_changes[:10]):  # Show first 10
+            print(f"  {i+1}. Frame {change['frame']} ({change['time']:.2f}s): {change['magnitude']:+.1f}")
+        if len(all_changes) > 10:
+            print(f"  ... and {len(all_changes)-10} more")
+        
+        # Create interactive plot
+        fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+        
+        # Plot brightness over time
+        frame_times = [self.frame_to_timestamp(i) for i in range(len(brightness_values))]
+        ax.plot(frame_times, brightness_values, 'b-', linewidth=1, alpha=0.8, label='Brightness')
+        
+        # Add a vertical line for EVERY SINGLE brightness change
+        change_lines = []
+        
+        print(f"Plotting {len(all_changes)} vertical lines...")
+        
+        for i, change in enumerate(all_changes):
+            time_sec = change['time']
+            magnitude = change['magnitude']
+            
+            # Color based on increase/decrease
+            if magnitude > 0:
+                color = 'green'
+                alpha = 0.5
+            else:
+                color = 'red'
+                alpha = 0.5
+            
+            # Create clickable vertical line for EVERY change
+            line = ax.axvline(x=time_sec, color=color, linestyle='-', linewidth=1, 
+                             alpha=alpha, picker=True, pickradius=3)
+            line.change_data = change  # Attach change info to line
+            line.original_alpha = alpha
+            line.original_linewidth = 1
+            change_lines.append(line)
+        
+        print(f"Plotted {len(change_lines)} vertical lines")
+        
+        ax.set_xlabel('Time (seconds)', fontsize=12)
+        ax.set_ylabel('Average Brightness', fontsize=12)
+        ax.set_title(f'Brightness Over Time - {len(all_changes)} Changes Plotted\n' + 
+                    'Every vertical line = one brightness change. Click any line to select houselight onset', fontsize=14)
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=12)
+        
+        # Add instruction text
+        instruction_text = (
+            'INSTRUCTIONS:\n'
+            f'• {len(all_changes)} vertical lines plotted\n'
+            f'• Threshold used: ±{min_change_threshold}\n'
+            '• Green = increases, Red = decreases\n'
+            '• Click ANY line to select\n'
+            '• Close window after selection'
+        )
+        ax.text(0.02, 0.98, instruction_text, transform=ax.transAxes, fontsize=11, 
+                verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', facecolor='lightyellow', alpha=0.9))
+        
+        # Track selected change
+        selected_change = {'value': None}
+        
+        def on_pick(event):
+            if hasattr(event.artist, 'change_data'):
+                change = event.artist.change_data
+                selected_change['value'] = change
+                
+                # Reset all lines to normal appearance
+                for line in change_lines:
+                    line.set_linewidth(line.original_linewidth)
+                    line.set_alpha(line.original_alpha)
+                
+                # Highlight selected line
+                event.artist.set_linewidth(3)
+                event.artist.set_alpha(1.0)
+                
+                # Update title to show selection
+                change_type = "increase" if change['magnitude'] > 0 else "decrease"
+                ax.set_title(f'SELECTED: Frame {change["frame"]} at {change["time"]:.2f}s ' +
+                           f'({change["magnitude"]:+.1f} brightness {change_type})\n' +
+                           'Close window to confirm selection', fontsize=14)
+                
+                fig.canvas.draw()
+                
+                print(f"Selected: Frame {change['frame']} ({change['time']:.2f}s) - {change['magnitude']:+.1f} brightness {change_type}")
+        
+        # Connect the pick event
+        fig.canvas.mpl_connect('pick_event', on_pick)
+        
+        plt.tight_layout()
         plt.show()
         
-        response = input(f"Houselight onset detected at {houselight_time:.2f}s. Confirm? (y/n): ")
-        
-        if response.lower() == 'y':
-            self.houselight_onset_time = houselight_time
-            return houselight_time
+        # Process the selection
+        if selected_change['value'] is not None:
+            change = selected_change['value']
+            selected_time = change['time']
+            selected_frame = change['frame']
+            
+            print(f"\nUser selected:")
+            print(f"  Frame: {selected_frame}")
+            print(f"  Time: {selected_time:.3f}s")
+            print(f"  Brightness change: {change['magnitude']:+.1f} ({change['type']})")
+            
+            # Confirm selection
+            response = input(f"\nConfirm houselight onset at {selected_time:.2f}s? (y/n): ")
+            
+            if response.lower() == 'y':
+                self.houselight_onset_time = selected_time
+                print(f"Houselight onset set to {selected_time:.3f}s")
+                return selected_time
+            else:
+                print("Selection cancelled")
+                return None
         else:
+            print("No change selected. Please run detection again and click on a line.")
             return None
+    
+    def debug_brightness_detection(self, search_frames=2000, show_frames=10):
+        """
+        Debug function to examine brightness changes in detail
+        Shows actual frame images around brightness changes
+        """
+        cap = cv2.VideoCapture(self.video_path)
+        if not cap.isOpened():
+            print("Cannot open video")
+            return
+        
+        print(f"Debugging brightness detection...")
+        
+        brightness_values = []
+        for frame_num in range(min(search_frames, int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))):
+            ret, frame = cap.read()
+            if not ret:
+                break
+            brightness = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+            brightness_values.append(brightness)
+        
+        # Find top changes
+        brightness_changes = np.diff(brightness_values)
+        top_changes = np.argsort(brightness_changes)[-5:][::-1]
+        
+        print(f"Examining top {len(top_changes)} brightness changes:")
+        
+        for i, change_idx in enumerate(top_changes):
+            frame_num = change_idx + 1
+            change_magnitude = brightness_changes[change_idx]
+            time_sec = self.frame_to_timestamp(frame_num)
+            
+            print(f"\n{i+1}. Frame {frame_num} ({time_sec:.2f}s): +{change_magnitude:.1f} brightness")
+            
+            # Show frames before and after the change
+            for offset in [-2, -1, 0, 1, 2]:
+                check_frame = max(0, frame_num + offset)
+                cap.set(cv2.CAP_PROP_POS_FRAMES, check_frame)
+                ret, frame = cap.read()
+                if ret:
+                    brightness = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+                    print(f"    Frame {check_frame}: brightness = {brightness:.1f}")
+        
+        cap.release()
     
     def get_body_keypoints(self):
         """
@@ -239,7 +429,7 @@ class ApproachAbortDetector:
         # Common keypoint names in SLEAP data
         keypoint_patterns = {
             'head_parts': ['snout', 'nose', 'tip', 'left_ear', 'leftear', 'ear_left', 'right_ear', 'rightear', 'ear_right'],
-            'body_parts': ['body', 'neck', 'shoulder', 'chest', 'back', 'spine', 'center', 'mid', 'torso'],
+            'body_parts': ['body','neck', 'shoulder', 'chest', 'back', 'spine', 'center', 'mid', 'torso'],
             'tail_parts': ['tail', 'tail_base', 'tailbase', 'tail_tip', 'tailtip', 'tail_end'],
             'limb_parts': ['front_left', 'front_right', 'back_left', 'back_right', 'paw', 'leg']
         }
@@ -679,99 +869,112 @@ class ApproachAbortDetector:
             print(f"Error loading touchscreen data: {e}")
             return None
     
-    def classify_events(self, touch_times, touch_window=0.5):
+    def classify_events(self, touch_times, touch_window=1):
         """
         Classify approach events as touch vs abort
-        Properly aligns video timeline with behavioral data timeline
+        Correctly converts both timelines to the same reference point
         """
         if touch_times is None or self.houselight_onset_time is None:
             print("Cannot classify events without touch data and houselight onset")
             return
         
-        print(f"Classifying events with proper timeline alignment...")
-        print(f"Houselight onset (video start): {self.houselight_onset_time:.3f}s in behavioral timeline")
+        print(f"Classifying events with correct timeline conversion...")
+        print(f"Houselight onset: {self.houselight_onset_time:.3f}s")
         print(f"Touch window: ±{touch_window}s")
         
-        # Convert touch times to video timeline by subtracting houselight onset
-        # Touch times are in behavioral timeline, video starts at houselight_onset_time
-        video_touch_times = touch_times - self.houselight_onset_time
+        # Convert approach events to same reference as ABET by subtracting houselight onset
+        # This converts absolute video timestamps to relative timestamps
+        approach_relative_times = []
+        for event in self.approach_events:
+            relative_time = event['time_sec'] - self.houselight_onset_time
+            approach_relative_times.append(relative_time)
         
-        # Only consider touches that occur during video recording (positive times)
-        valid_video_touches = video_touch_times[video_touch_times >= 0]
-        
-        print(f"Total touch events in behavioral data: {len(touch_times)}")
-        print(f"Touch events during video recording: {len(valid_video_touches)}")
-        
-        if len(valid_video_touches) > 0:
-            print(f"Video touch times range: {valid_video_touches.min():.3f}s to {valid_video_touches.max():.3f}s")
+        print(f"Total touch events in ABET data: {len(touch_times)}")
+        print(f"ABET touch times range: {touch_times.min():.3f}s to {touch_times.max():.3f}s")
+        print(f"Approach events (converted) range: {min(approach_relative_times):.3f}s to {max(approach_relative_times):.3f}s")
         
         # Classify each approach event
         touch_events = 0
         abort_events = 0
         
         for i, event in enumerate(self.approach_events):
-            event_time_video = event['time_sec']  # This is already in video timeline
+            # Convert approach event to same reference as ABET
+            approach_relative_time = event['time_sec'] - self.houselight_onset_time
             
             # Look for touch within touch_window seconds of the approach event
-            time_diffs = np.abs(valid_video_touches - event_time_video)
+            time_diffs = np.abs(touch_times - approach_relative_time)
             nearby_touches = time_diffs <= touch_window
             
             if np.any(nearby_touches):
                 # Find the closest touch
                 closest_touch_idx = np.argmin(time_diffs)
-                closest_touch_delay = valid_video_touches[closest_touch_idx] - event_time_video
+                closest_touch_time_abet = touch_times[closest_touch_idx]
+                closest_touch_delay = closest_touch_time_abet - approach_relative_time
                 
                 event['classification'] = 'touch'
                 event['touch_delay'] = closest_touch_delay
-                event['closest_touch_time'] = valid_video_touches[closest_touch_idx]
+                event['closest_touch_time_abet'] = closest_touch_time_abet
+                event['approach_relative_time'] = approach_relative_time
                 touch_events += 1
                 
                 # Debug output for first few events
                 if i < 5:
-                    print(f"  Event {i+1} at {event_time_video:.3f}s -> TOUCH (delay: {closest_touch_delay:+.3f}s)")
+                    print(f"  Event {i+1}: {event['time_sec']:.3f}s (video) -> {approach_relative_time:.3f}s (relative) -> TOUCH at {closest_touch_time_abet:.3f}s (ABET), delay: {closest_touch_delay:+.3f}s")
             else:
                 event['classification'] = 'abort'
                 event['touch_delay'] = None
-                event['closest_touch_time'] = None
+                event['closest_touch_time_abet'] = None
+                event['approach_relative_time'] = approach_relative_time
                 abort_events += 1
                 
                 # Debug output for first few events
                 if i < 5:
-                    closest_touch_time = valid_video_touches[np.argmin(np.abs(valid_video_touches - event_time_video))] if len(valid_video_touches) > 0 else None
-                    if closest_touch_time is not None:
-                        closest_diff = closest_touch_time - event_time_video
-                        print(f"  Event {i+1} at {event_time_video:.3f}s -> ABORT (closest touch: {closest_diff:+.3f}s away)")
-                    else:
-                        print(f"  Event {i+1} at {event_time_video:.3f}s -> ABORT (no touches during video)")
+                    closest_touch_time = touch_times[np.argmin(np.abs(touch_times - approach_relative_time))]
+                    closest_diff = closest_touch_time - approach_relative_time
+                    print(f"  Event {i+1}: {event['time_sec']:.3f}s (video) -> {approach_relative_time:.3f}s (relative) -> ABORT (closest touch: {closest_diff:+.3f}s away)")
         
         print(f"\nClassification results:")
         print(f"  Touch events: {touch_events}")
         print(f"  Abort events: {abort_events}")
         print(f"  Touch rate: {100*touch_events/(touch_events+abort_events):.1f}%")
         
-        # Additional diagnostic: show touch timing relative to events
-        if len(valid_video_touches) > 0 and len(self.approach_events) > 0:
-            event_times = [e['time_sec'] for e in self.approach_events]
-            print(f"\nTiming analysis:")
-            print(f"  Event times range: {min(event_times):.3f}s to {max(event_times):.3f}s")
-            print(f"  Touch times range: {min(valid_video_touches):.3f}s to {max(valid_video_touches):.3f}s")
+        # Additional diagnostic: show overlap analysis
+        if len(touch_times) > 0 and len(approach_relative_times) > 0:
+            print(f"\nTiming analysis (both in relative timeline):")
+            print(f"  ABET touch times range: {touch_times.min():.3f}s to {touch_times.max():.3f}s")
+            print(f"  Approach events range: {min(approach_relative_times):.3f}s to {max(approach_relative_times):.3f}s")
             
-            # Check if there's significant overlap
-            event_span = (min(event_times), max(event_times))
-            touch_span = (min(valid_video_touches), max(valid_video_touches))
-            overlap_start = max(event_span[0], touch_span[0])
-            overlap_end = min(event_span[1], touch_span[1])
+            # Check overlap
+            touch_span = (touch_times.min(), touch_times.max())
+            event_span = (min(approach_relative_times), max(approach_relative_times))
+            overlap_start = max(touch_span[0], event_span[0])
+            overlap_end = min(touch_span[1], event_span[1])
             
             if overlap_end > overlap_start:
                 overlap_duration = overlap_end - overlap_start
-                event_duration = event_span[1] - event_span[0]
-                touch_duration = touch_span[1] - touch_span[0]
-                print(f"  Timeline overlap: {overlap_duration:.1f}s ({100*overlap_duration/max(event_duration,touch_duration):.1f}% of total span)")
+                total_span = max(touch_span[1], event_span[1]) - min(touch_span[0], event_span[0])
+                print(f"  Timeline overlap: {overlap_duration:.1f}s ({100*overlap_duration/total_span:.1f}% of total timespan)")
             else:
                 print(f"  WARNING: No timeline overlap detected!")
-                print(f"    Events: {event_span[0]:.1f}s to {event_span[1]:.1f}s")
-                print(f"    Touches: {touch_span[0]:.1f}s to {touch_span[1]:.1f}s")
+                print(f"    Approach events: {event_span[0]:.1f}s to {event_span[1]:.1f}s")
+                print(f"    ABET touches: {touch_span[0]:.1f}s to {touch_span[1]:.1f}s")
                 print(f"    Check houselight detection accuracy!")
+            
+            # Show some example matches
+            print(f"\nExample matches within {touch_window}s:")
+            match_count = 0
+            for i, event in enumerate(self.approach_events[:10]):  # Check first 10 events
+                approach_relative_time = event['time_sec'] - self.houselight_onset_time
+                time_diffs = np.abs(touch_times - approach_relative_time)
+                min_diff = np.min(time_diffs)
+                if min_diff <= touch_window:
+                    closest_touch_time = touch_times[np.argmin(time_diffs)]
+                    print(f"    Event {i+1}: {approach_relative_time:.3f}s -> Touch at {closest_touch_time:.3f}s (diff: {closest_touch_time - approach_relative_time:+.3f}s)")
+                    match_count += 1
+            
+            if match_count == 0:
+                print(f"    No matches found in first 10 events within {touch_window}s window")
+                print(f"    Consider increasing touch_window or checking houselight detection")
     
     def debug_event_timing(self, event_index=0):
         """
@@ -1128,7 +1331,7 @@ class ApproachAbortDetector:
 
 # Example usage with suppression
 if __name__ == "__main__":
-    base_path = r"C:\Users\Patrick\Desktop\RRD414\RDT D1 CNO"
+    base_path = r"C:\Users\Patrick\Desktop\RRD414\RDT D1 CNO\RDT D1 CNO"
     
     detector = ApproachAbortDetector(base_path)
     
@@ -1137,7 +1340,7 @@ if __name__ == "__main__":
         detector.run_analysis(
             num_clips=20,
             proximity_threshold=60,      # Distance threshold to screens
-            velocity_threshold=150,       # Movement speed threshold
+            velocity_threshold=15,       # Movement speed threshold
             suppression_frames=30        # Minimum frames between events (prevents duplicates)
         )
         
