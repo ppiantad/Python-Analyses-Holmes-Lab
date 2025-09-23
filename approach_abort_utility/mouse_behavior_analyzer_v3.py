@@ -623,16 +623,6 @@ class ApproachAbortDetector:
         return coords
     
     def determine_screen_from_orientation(self, head_pos, body_orientation):
-        """
-        Determine which screen the mouse is approaching based on body orientation
-        
-        Args:
-            head_pos: (x, y) position of mouse head
-            body_orientation: angle in degrees (0-360) that mouse body is facing
-            
-        Returns:
-            ('left'/'right'/None, confidence_score)
-        """
         if pd.isna(body_orientation):
             return None, 0.0
         
@@ -645,11 +635,11 @@ class ApproachAbortDetector:
                         self.touchscreen_lines['left']['end'][1]) / 2
         
         right_center_x = (self.touchscreen_lines['right']['start'][0] + 
-                         self.touchscreen_lines['right']['end'][0]) / 2
+                        self.touchscreen_lines['right']['end'][0]) / 2
         right_center_y = (self.touchscreen_lines['right']['start'][1] + 
-                         self.touchscreen_lines['right']['end'][1]) / 2
+                        self.touchscreen_lines['right']['end'][1]) / 2
         
-        # Calculate angles from head to each screen
+        # Calculate angles TO each screen (where mouse should look to see each screen)
         left_angle = np.degrees(np.arctan2(left_center_y - head_y, left_center_x - head_x))
         right_angle = np.degrees(np.arctan2(right_center_y - head_y, right_center_x - head_x))
         
@@ -659,7 +649,7 @@ class ApproachAbortDetector:
         if right_angle < 0:
             right_angle += 360
         
-        # Calculate angular differences (handle wrap-around)
+        # Calculate angular differences
         def angular_diff(a1, a2):
             diff = abs(a1 - a2)
             return min(diff, 360 - diff)
@@ -667,14 +657,66 @@ class ApproachAbortDetector:
         left_diff = angular_diff(body_orientation, left_angle)
         right_diff = angular_diff(body_orientation, right_angle)
         
-        # Determine target screen (smaller angle difference = better match)
+        # Debug print for troubleshooting
+        print(f"Body orientation: {body_orientation:.1f}°, Left angle: {left_angle:.1f}°, Right angle: {right_angle:.1f}°")
+        print(f"Left diff: {left_diff:.1f}°, Right diff: {right_diff:.1f}°")
+        
+        # Choose screen with smaller angular difference
         if left_diff < right_diff:
-            confidence = max(0, (90 - left_diff) / 90)  # Scale so 0° diff = 1.0 confidence
+            confidence = max(0, (90 - left_diff) / 90)
             return 'left', confidence
         else:
             confidence = max(0, (90 - right_diff) / 90)
             return 'right', confidence
-    
+
+    def determine_screen_from_orientation_v2(self, head_pos, body_orientation):
+        if pd.isna(body_orientation):
+            return None, 0.0
+        
+        head_x, head_y = head_pos
+        
+        # Convert body orientation to unit vector
+        facing_x = np.cos(np.radians(body_orientation))
+        facing_y = np.sin(np.radians(body_orientation))
+        
+        # Get vectors to each screen
+        left_center_x = (self.touchscreen_lines['left']['start'][0] + 
+                        self.touchscreen_lines['left']['end'][0]) / 2
+        left_center_y = (self.touchscreen_lines['left']['start'][1] + 
+                        self.touchscreen_lines['left']['end'][1]) / 2
+        
+        right_center_x = (self.touchscreen_lines['right']['start'][0] + 
+                        self.touchscreen_lines['right']['end'][0]) / 2
+        right_center_y = (self.touchscreen_lines['right']['start'][1] + 
+                        self.touchscreen_lines['right']['end'][1]) / 2
+        
+        # Normalize vectors to screens
+        left_vec_x = left_center_x - head_x
+        left_vec_y = left_center_y - head_y
+        left_dist = np.sqrt(left_vec_x**2 + left_vec_y**2)
+        if left_dist > 0:
+            left_vec_x /= left_dist
+            left_vec_y /= left_dist
+        
+        right_vec_x = right_center_x - head_x
+        right_vec_y = right_center_y - head_y
+        right_dist = np.sqrt(right_vec_x**2 + right_vec_y**2)
+        if right_dist > 0:
+            right_vec_x /= right_dist
+            right_vec_y /= right_dist
+        
+        # Calculate dot products (cosine of angle between vectors)
+        left_dot = facing_x * left_vec_x + facing_y * left_vec_y
+        right_dot = facing_x * right_vec_x + facing_y * right_vec_y
+        
+        # Higher dot product = better alignment
+        if left_dot > right_dot:
+            confidence = max(0, left_dot)  # dot product is already 0-1 for good alignment
+            return 'left', confidence
+        else:
+            confidence = max(0, right_dot)
+            return 'right', confidence
+
     def distance_to_line(self, point, line_start, line_end):
         """Calculate distance from point to line"""
         x0, y0 = point
@@ -687,36 +729,110 @@ class ApproachAbortDetector:
         
         return num / den if den > 0 else float('inf')
     
-    def detect_approach_events(self, proximity_threshold=60, velocity_threshold=15, 
-                             time_window_frames=30, min_quality=1, suppression_frames=10):
+    def determine_target_screen_by_position(self, head_pos):
         """
-        Detect approach events using robust head position and body orientation
+        Determine target screen based on head X position relative to screen centers
+        """
+        head_x, head_y = head_pos
         
-        Args:
-            proximity_threshold: Max distance to screen to consider "approach"
-            velocity_threshold: Min velocity change to consider "rapid movement"
-            time_window_frames: Frames to analyze for velocity change (~1 sec at 30fps)
-            min_quality: Minimum head tracking quality required
-            suppression_frames: Minimum frames between events (prevents duplicates)
+        # Get screen center X coordinates
+        left_center_x = (self.touchscreen_lines['left']['start'][0] + 
+                        self.touchscreen_lines['left']['end'][0]) / 2
+        right_center_x = (self.touchscreen_lines['right']['start'][0] + 
+                        self.touchscreen_lines['right']['end'][0]) / 2
+        
+        # Calculate distances in X direction
+        left_x_dist = abs(head_x - left_center_x)
+        right_x_dist = abs(head_x - right_center_x)
+        
+        # Choose based on X proximity
+        if left_x_dist < right_x_dist:
+            confidence = max(0, 1 - (left_x_dist / 200))  # Adjust denominator as needed
+            return 'left', confidence
+        else:
+            confidence = max(0, 1 - (right_x_dist / 200))
+            return 'right', confidence
+
+
+
+    def determine_target_screen_by_direction(self, head_pos):
+        """
+        Determine which screen the head is pointing toward based on direct head-to-screen vectors
+        """
+        head_x, head_y = head_pos
+        
+        # Get screen centers
+        left_center_x = (self.touchscreen_lines['left']['start'][0] + 
+                        self.touchscreen_lines['left']['end'][0]) / 2
+        left_center_y = (self.touchscreen_lines['left']['start'][1] + 
+                        self.touchscreen_lines['left']['end'][1]) / 2
+        
+        right_center_x = (self.touchscreen_lines['right']['start'][0] + 
+                        self.touchscreen_lines['right']['end'][0]) / 2
+        right_center_y = (self.touchscreen_lines['right']['start'][1] + 
+                        self.touchscreen_lines['right']['end'][1]) / 2
+        
+        # Calculate direct distances to screen centers
+        left_distance = euclidean((head_x, head_y), (left_center_x, left_center_y))
+        right_distance = euclidean((head_x, head_y), (right_center_x, right_center_y))
+        
+        # Choose the closer screen center
+        if left_distance < right_distance:
+            confidence = max(0, 1 - (left_distance / 300))  # Adjust denominator based on your video scale
+            return 'left', confidence
+        else:
+            confidence = max(0, 1 - (right_distance / 300))
+            return 'right', confidence
+
+
+
+    def determine_target_screen_simple(self, head_pos):
+        """
+        Determine target screen based on which screen the head is closer to
+        """
+        head_x, head_y = head_pos
+        
+        # Calculate distance to each screen line
+        left_dist = self.distance_to_line(
+            (head_x, head_y),
+            self.touchscreen_lines['left']['start'],
+            self.touchscreen_lines['left']['end']
+        )
+        
+        right_dist = self.distance_to_line(
+            (head_x, head_y),
+            self.touchscreen_lines['right']['start'],
+            self.touchscreen_lines['right']['end']
+        )
+        
+        # Choose the closer screen
+        if left_dist < right_dist:
+            confidence = max(0, 1 - (left_dist / 100))  # Higher confidence for closer distances
+            return 'left', confidence
+        else:
+            confidence = max(0, 1 - (right_dist / 100))
+            return 'right', confidence
+
+
+    def detect_approach_events(self, proximity_threshold=60, velocity_threshold=15, 
+                            time_window_frames=30, min_quality=1, suppression_frames=10):
+        """
+        Detect approach events using simple head position screening
         """
         if self.combined_data is None:
             raise ValueError("No combined data available")
-        
+
         # Get body keypoints
         keypoints = self.get_body_keypoints()
         
         # Create robust head position
         head_x, head_y, head_quality = self.create_robust_head_position(keypoints)
         
-        # Get body orientation
-        body_orientation, orientation_quality = self.get_body_orientation(keypoints)
-        
         events = []
-        last_event_frame = -float('inf')  # Track last event frame for suppression
+        last_event_frame = -float('inf')
         
         print(f"Analyzing {len(self.combined_data)} frames for approach events...")
-        print("Using body orientation for screen determination")
-        print(f"Suppression window: {suppression_frames} frames ({suppression_frames/self.video_fps:.2f} seconds)")
+        print("Using simple head position for screen determination")
         
         for i in range(time_window_frames, len(self.combined_data) - time_window_frames):
             if i % 10000 == 0:
@@ -757,16 +873,10 @@ class ApproachAbortDetector:
             if not near_screen:
                 continue
             
-            # Determine target screen using body orientation
-            current_orientation = body_orientation[i] if body_orientation is not None else np.nan
-            target_screen, screen_confidence = self.determine_screen_from_orientation(
-                (head_x_curr, head_y_curr), current_orientation
-            )
+            # Determine target screen using simple method (choose one of the options above)
+            target_screen, screen_confidence = self.determine_target_screen_by_direction((head_x_curr, head_y_curr))
             
-            if target_screen is None:
-                continue
-            
-            # Check for rapid movement (approach event detection)
+            # Rest of your velocity detection logic stays the same...
             future_positions = []
             quality_scores = []
             
@@ -810,30 +920,19 @@ class ApproachAbortDetector:
                         'head_y': head_y_curr,
                         'end_x': end_pos[0],
                         'end_y': end_pos[1],
-                        'body_orientation': current_orientation,
                         'screen_confidence': screen_confidence,
                         'head_quality': avg_quality,
-                        'detection_method': 'body_orientation',
+                        'detection_method': 'simple_head_position',
                         'frames_since_last_event': i - last_event_frame if last_event_frame != -float('inf') else float('inf')
                     }
                     
                     events.append(event)
-                    last_event_frame = i  # Update suppression tracker
+                    last_event_frame = i
                     
                     print(f"Event detected at frame {i} (suppressed next {suppression_frames} frames)")
         
         self.approach_events = events
-        
-        # Calculate suppression statistics
-        if len(events) > 1:
-            frame_gaps = [events[i]['frames_since_last_event'] for i in range(1, len(events))]
-            frame_gaps = [gap for gap in frame_gaps if gap != float('inf')]
-            if frame_gaps:
-                min_gap = min(frame_gaps)
-                avg_gap = np.mean(frame_gaps)
-                print(f"Event spacing: min={min_gap} frames ({min_gap/self.video_fps:.2f}s), avg={avg_gap:.1f} frames ({avg_gap/self.video_fps:.2f}s)")
-        
-        print(f"Detected {len(events)} approach events using body orientation method with suppression")
+        print(f"Detected {len(events)} approach events using simple head position method")
         return events
     
     def load_touchscreen_data(self, touchscreen_file=None):
@@ -841,8 +940,8 @@ class ApproachAbortDetector:
         if touchscreen_file is None:
             # Try both possible locations
             possible_files = [
-                os.path.join(self.base_path, "D2-9 10302019.csv"),
-                os.path.join(os.path.dirname(self.base_path), "D2-9 10302019.csv")
+                os.path.join(self.base_path, "D1-6 10252019.csv"),
+                os.path.join(os.path.dirname(self.base_path), "D1-6 10252019.csv")
             ]
             
             for file_path in possible_files:
@@ -1331,7 +1430,7 @@ class ApproachAbortDetector:
 
 # Example usage with suppression
 if __name__ == "__main__":
-    base_path = r"C:\Users\dicbr\Desktop\D2-9\RDT D2"
+    base_path = r"C:\Users\dicbr\Desktop\D1-6\RDT D1"
     
     detector = ApproachAbortDetector(base_path)
     
