@@ -940,8 +940,8 @@ class ApproachAbortDetector:
         if touchscreen_file is None:
             # Try both possible locations
             possible_files = [
-                os.path.join(self.base_path, "D1-6 10252019.csv"),
-                os.path.join(os.path.dirname(self.base_path), "D1-6 10252019.csv")
+                os.path.join(self.base_path, "D2-12 10232019.csv"),
+                os.path.join(os.path.dirname(self.base_path), "D2-12 10232019.csv")
             ]
             
             for file_path in possible_files:
@@ -1430,7 +1430,7 @@ class ApproachAbortDetector:
 
 # Example usage with suppression
 if __name__ == "__main__":
-    base_path = r"C:\Users\dicbr\Desktop\D1-6\RDT D1"
+    base_path = r"C:\Users\dicbr\Desktop\D2-12\RDT D1"
     
     detector = ApproachAbortDetector(base_path)
     
