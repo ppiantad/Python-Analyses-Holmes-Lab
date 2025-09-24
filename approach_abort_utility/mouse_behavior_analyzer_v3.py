@@ -265,7 +265,7 @@ class ApproachAbortDetector:
             print(f"  ... and {len(all_changes)-10} more")
         
         # Create interactive plot
-        fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+        fig, ax = plt.subplots(1, 1, figsize=(10, 5))
         
         # Plot brightness over time
         frame_times = [self.frame_to_timestamp(i) for i in range(len(brightness_values))]
@@ -940,8 +940,8 @@ class ApproachAbortDetector:
         if touchscreen_file is None:
             # Try both possible locations
             possible_files = [
-                os.path.join(self.base_path, "D2-12 10232019.csv"),
-                os.path.join(os.path.dirname(self.base_path), "D2-12 10232019.csv")
+                os.path.join(self.base_path, behav_file),
+                os.path.join(os.path.dirname(self.base_path), behav_file)
             ]
             
             for file_path in possible_files:
@@ -970,7 +970,7 @@ class ApproachAbortDetector:
     
     def classify_events(self, touch_times, touch_window=1):
         """
-        Classify approach events as touch vs abort
+        Classify approach events as touch vs abort, with screen information
         Correctly converts both timelines to the same reference point
         """
         if touch_times is None or self.houselight_onset_time is None:
@@ -995,6 +995,10 @@ class ApproachAbortDetector:
         # Classify each approach event
         touch_events = 0
         abort_events = 0
+        left_touch_events = 0
+        right_touch_events = 0
+        left_abort_events = 0
+        right_abort_events = 0
         
         for i, event in enumerate(self.approach_events):
             # Convert approach event to same reference as ABET
@@ -1004,13 +1008,23 @@ class ApproachAbortDetector:
             time_diffs = np.abs(touch_times - approach_relative_time)
             nearby_touches = time_diffs <= touch_window
             
+            # Get screen information
+            screen = event.get('screen', 'unknown')
+            
             if np.any(nearby_touches):
                 # Find the closest touch
                 closest_touch_idx = np.argmin(time_diffs)
                 closest_touch_time_abet = touch_times[closest_touch_idx]
                 closest_touch_delay = closest_touch_time_abet - approach_relative_time
                 
-                event['classification'] = 'touch'
+                # Classify touch with screen information
+                event['classification'] = f'{screen} touch'
+                
+                if screen == 'left':
+                    left_touch_events += 1
+                elif screen == 'right':
+                    right_touch_events += 1
+                
                 event['touch_delay'] = closest_touch_delay
                 event['closest_touch_time_abet'] = closest_touch_time_abet
                 event['approach_relative_time'] = approach_relative_time
@@ -1018,9 +1032,16 @@ class ApproachAbortDetector:
                 
                 # Debug output for first few events
                 if i < 5:
-                    print(f"  Event {i+1}: {event['time_sec']:.3f}s (video) -> {approach_relative_time:.3f}s (relative) -> TOUCH at {closest_touch_time_abet:.3f}s (ABET), delay: {closest_touch_delay:+.3f}s")
+                    print(f"  Event {i+1}: {event['time_sec']:.3f}s (video) -> {approach_relative_time:.3f}s (relative) -> {event['classification'].upper()} at {closest_touch_time_abet:.3f}s (ABET), delay: {closest_touch_delay:+.3f}s")
             else:
-                event['classification'] = 'abort'
+                # Classify abort with screen information
+                event['classification'] = f'{screen} abort'
+                
+                if screen == 'left':
+                    left_abort_events += 1
+                elif screen == 'right':
+                    right_abort_events += 1
+                
                 event['touch_delay'] = None
                 event['closest_touch_time_abet'] = None
                 event['approach_relative_time'] = approach_relative_time
@@ -1030,11 +1051,15 @@ class ApproachAbortDetector:
                 if i < 5:
                     closest_touch_time = touch_times[np.argmin(np.abs(touch_times - approach_relative_time))]
                     closest_diff = closest_touch_time - approach_relative_time
-                    print(f"  Event {i+1}: {event['time_sec']:.3f}s (video) -> {approach_relative_time:.3f}s (relative) -> ABORT (closest touch: {closest_diff:+.3f}s away)")
+                    print(f"  Event {i+1}: {event['time_sec']:.3f}s (video) -> {approach_relative_time:.3f}s (relative) -> {event['classification'].upper()} (closest touch: {closest_diff:+.3f}s away)")
         
         print(f"\nClassification results:")
-        print(f"  Touch events: {touch_events}")
-        print(f"  Abort events: {abort_events}")
+        print(f"  Left touch events: {left_touch_events}")
+        print(f"  Right touch events: {right_touch_events}")
+        print(f"  Left abort events: {left_abort_events}")
+        print(f"  Right abort events: {right_abort_events}")
+        print(f"  Total touch events: {touch_events}")
+        print(f"  Total abort events: {abort_events}")
         print(f"  Touch rate: {100*touch_events/(touch_events+abort_events):.1f}%")
         
         # Additional diagnostic: show overlap analysis
@@ -1116,7 +1141,7 @@ class ApproachAbortDetector:
         return behavioral_time
     
     def save_events(self, output_path=None):
-        """Save approach events to CSV"""
+        """Save approach events to CSV with houselight onset as first row"""
         if not self.approach_events:
             print("No events to save")
             return
@@ -1124,9 +1149,34 @@ class ApproachAbortDetector:
         if output_path is None:
             output_path = os.path.join(self.base_path, 'approach_events.csv')
         
+        # Create DataFrame from events
         df = pd.DataFrame(self.approach_events)
+        
+        # Create houselight onset row
+        if self.houselight_onset_time is not None:
+            houselight_row = pd.Series(index=df.columns, dtype=object)
+            houselight_row['classification'] = 'start'
+            houselight_row['time_sec'] = self.houselight_onset_time
+            houselight_row['frame'] = int(self.houselight_onset_time * self.video_fps) if self.video_fps > 0 else 0
+            
+            # Convert to hh:mm:ss format
+            hours = int(self.houselight_onset_time // 3600)
+            minutes = int((self.houselight_onset_time % 3600) // 60)
+            seconds = self.houselight_onset_time % 60
+            houselight_row['time_hms'] = f"{hours:02d}h{minutes:02d}m{seconds:06.3f}s"
+            
+            # Fill other relevant fields
+            houselight_row['screen'] = 'houselight_onset'
+            houselight_row['velocity'] = 0
+            houselight_row['movement_distance'] = 0
+            houselight_row['detection_method'] = 'houselight_detection'
+            
+            # Create new DataFrame with houselight row at the top
+            houselight_df = pd.DataFrame([houselight_row])
+            df = pd.concat([houselight_df, df], ignore_index=True)
+        
         df.to_csv(output_path, index=False)
-        print(f"Saved {len(self.approach_events)} events to {output_path}")
+        print(f"Saved {len(self.approach_events)} events + houselight onset to {output_path}")
         return output_path
     
     def create_event_screenshots(self, num_screenshots=20):
@@ -1430,8 +1480,9 @@ class ApproachAbortDetector:
 
 # Example usage with suppression
 if __name__ == "__main__":
-    base_path = r"C:\Users\dicbr\Desktop\D2-12\RDT D1"
-    
+    base_path = r"C:\Users\Patrick\Desktop\RDT D1"
+    behav_file = r"D1-10 02072020.csv"
+
     detector = ApproachAbortDetector(base_path)
     
     try:
